@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 4.2 Structure
-parent: 4. Ansible
+parent: 4. Implementation
 nav_order: 2
 ---
 
