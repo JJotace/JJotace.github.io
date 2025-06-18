@@ -48,6 +48,20 @@ At the end of each sprint, there will be a review to check the progress and qual
 
 ## Sprint Retrospective
 
+A sprint retrospective is a meeting held at the end of each sprint, during which the just-completed sprint is reflected upon. This is not a review of the sprint, as mentioned earlier, but rather serves to assess and discuss how the team worked together, including which processes, tools, and practices were used.
 
+During the retrospective these points are made:
+
+- What went well during the sprint
+- What did not go well or could be improved
+- What changes will be implemented on the next sprint, if any, to improve the quality and effectiveness
 
 ## Kanban
+
+Kanban is a visual workflow management method that centers around the philosophy of continuous improvement. Kanban organizes the different items and goals from the project into a board, in which the team can easily visualize what is yet to be done, what is work in progress and what is done. This approach helps easily identify the status of each task and idenfity bottlenecks.
+
+## Why Scrum
+
+For this project, I chose to use Scrum because it’s an approach we recently had the opportunity to learn about in school. I wanted to further develop my skills and deepen my understanding of the topic, which is why I decided to use it.
+
+I have also seen firsthand that Agile methods like Scrum are commonly used in real-world projects, including at my workplace, where we use tools like Jira to manage our work. To better align myself with my company’s practices and become a more valuable member of my team, I felt Scrum was the most effective choice to help me progress faster and contribute more effectively.
