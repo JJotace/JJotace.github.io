@@ -119,6 +119,6 @@ This string is coded into my playbook with help of the extra vars above as follo
 
 {% raw %}
 ```
-jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCPS)(HOST = {{ host }} )(PORT = 1522)))(CONNECT_DATA = (SERVICE_NAME = {{ database_name }}))  (SECURITY = (SSL_SERVER_CERT_DN = \"{{ ssl_cert }},OU=OracleDB,OU=CA,O=UBS,C=CH\")))
+jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCPS)(HOST = {{ host }} )(PORT = XXXX)))(CONNECT_DATA = (SERVICE_NAME = {{ database_name }}))  (SECURITY = (SSL_SERVER_CERT_DN = \"{{ ssl_cert }},OU=OracleDB,OU=CA,O=XXX,C=CH\")))
 ```
 {% endraw %}

@@ -13,7 +13,7 @@ DB Collectors automation
 
 ## Starting Situation
 
-Within our team in UBS, we are in charge of several databases. These databases are monitored through AppDynamics, a full-stack application performance monitoring and analytics platform that helps organizations track, optimize, and troubleshoot application and infrastructure performance in real time.
+Within our team in my company, we are in charge of several databases. These databases are monitored through AppDynamics, a full-stack application performance monitoring and analytics platform that helps organizations track, optimize, and troubleshoot application and infrastructure performance in real time.
 
 Setting up one of these databases is currently a repetitive manual process that needs to be done for every single collector we want to create within the monitoring tool.
 
@@ -36,7 +36,7 @@ This will decrease the manual labor involved in improving our visibility for our
 1. **Analyze and plan**
    - Indentify all the databases assigned to our team that haven't yet been onboarded.
    - Define exactly what the code should do and how.
-   - Plan according to our current UBS architecture (dev, test, preprod, prod...)
+   - Plan according to our current company architecture (dev, test, preprod, prod...)
 
 2. **Ansible Playbook**
    - Design and implement an Ansible playbook that can configure oracle database collectors in AppDynamics.
