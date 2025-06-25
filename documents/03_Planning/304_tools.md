@@ -5,7 +5,9 @@ parent: 3. Planning
 nav_order: 4
 ---
 
-# Jira
+# 3.4 Methods & Tools
+
+## Jira
 
 Jira makes it easy to have a project overview through Scrum and Kanban boards, as well as monitoring the progress made.
 
@@ -17,7 +19,7 @@ The Kanban board displays the status of each task as it progresses through the s
 
 This visual workflow helps the team quickly identify bottlenecks and maintain a steady pace.
 
-## Task Fields
+### Task Fields
 
 Each task in Jira includes several key fields to support organization and prioritization:
 
@@ -38,7 +40,7 @@ This structured approach ensures transparency, accountability, and effective spr
 By leveraging Jira's boards and detailed task fields, teams can maintain clarity, focus on priorities, and continuously improve their workflow.
  
 
-# GitHub Repository & Pages
+## GitHub Repository & Pages
  
 The project’s documentation is written in markdown format and stored in a git-repository in GitHub. This repository contains all the project’s documents, images, and configuration files.
 
