@@ -19,5 +19,4 @@ All environments need to be defined for every controller, regardless of where th
 
 ## Visual Structure plan
 
-
 ![diagram_ansible_controller](../../resources/images/diagram.drawio.png)

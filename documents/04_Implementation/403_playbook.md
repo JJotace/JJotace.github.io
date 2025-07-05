@@ -46,50 +46,49 @@ As I have made this project for my company, I am not allowed to share the entire
 
 ### Extra Vars & Variables
 
-Extra Var 01: Requestor gives desired name as per company guidelines.
-{% raw %}
-```yaml
-  - name: collector_name
-    set_fact:
-     collector: "{{ collector_name }}"
-```
-{% endraw %}
-
-
-For verification purposes, the collector name gets written in the output thanks to the below:
+Extra Var 01: Requestor gives in desired name as per company guidelines and is saved and displayed in the below debugging message for verification purposes.
 {% raw %}
 ```yaml
   - name:
     debug:
-     msg: "This is the collector of the database: {{ collector_name }}"
+     msg: "This is the collector name: {{ collector_name }}"
 ```
 {% endraw %}
 
-Extra Var 02: Host is saved in this variable.
+
+Extra Var 02: Host of the database & verification.
 {% raw %}
 ```yaml
-  - name: host
-    set_fact:
-     host: "{{ host }}"
+  - name:
+    debug:
+     msg: "This is the host {{ host }}"
 ```
 {% endraw %}
 
-Extra Var 03: Database FQDN
+Extra Var 03: Database FQDN & verification.
 {% raw %}
 ```yaml
-  - name: database_name
-    set_fact:
-     db_user: "{{ database_name }}"
+  - name:
+    debug:
+     msg: "This is the Database FQDN {{ database_name }}"
 ```
 {% endraw %}
 
 Extra Var 04: OUM Identifier for the database or SLL Certificate of the database.
 {% raw %}
 ```yaml
-  - name: ssl_cert
-    set_fact:
-     db_user: "{{ ssl_cert }}"
+  - name:
+    debug:
+     msg: "This is the SSL Cert {{ ssl_cert }}"
+```
+{% endraw %}
 
+Extra Var 05 (Optional): Port Number, in case the database has a non default port open.
+{% raw %}
+```yaml
+  - name:
+    debug:
+     msg: "This is the port {{ port }}"
 ```
 {% endraw %}
 
