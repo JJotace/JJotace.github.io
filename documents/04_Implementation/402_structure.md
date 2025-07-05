@@ -17,4 +17,6 @@ As per shown below, this is what it looks like to have a playbook in one of thes
 
 All environments need to be defined for every controller, regardless of where this is located, because the contents should be the same across every server.
 
-## Visual Structure plan WIP
+## Visual Structure plan
+
+![diagram_ansible_controller](../../resources/images/diagram.drawio.png)
