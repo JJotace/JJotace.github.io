@@ -62,8 +62,9 @@ With this in mind, I checked every single system and noted down what command the
 ```
 {% endraw %}
 
-
 ### Keystore path changes
 
 
 ### New Ansible Controllers
+
+Within my company, two more ansible controllers hosted in the cloud have been added. Some of these had the data copied over, but some did not, which cost me a bit of time figuring out which ones have it and which ones don't, and creating by hand the directories, playbook, host list and setting the permissions for the directory.
