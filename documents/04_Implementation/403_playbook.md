@@ -33,15 +33,17 @@ In order for a database collector to be created, I will need a few different pie
 As I have made this project for my company, I am not allowed to share the entirety of the code, as to not breach any security of privacy policies, but I will share bits and pieces and explain every part of it within this documentation.
 
 - The name of the playbook is defined within the first line, "oracleansible-ops" as per company guidelines.
-- It will run locally in the ansible controller as specified within the hosts section with "localhost".
-- Gather facts is a default in every playbook, but in this case it is not needed, so I have left it in but commented out for completion purposes.
+- It will run locally in the ansible controller as specified within the hosts section with "localhost" as root.
+- Gather facts is a default in every playbook within our company, as this is not needed for mine, I set it to no.
 - tasks defines the start of the playbook and the actions it will take.
 
 ```yaml
 - name: oracleansible-ops
-  hosts: localhost
-#  gather_facts: yes
-  tasks:
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    port: 1522 # Default port value
 ```
 
 ### Extra Vars & Variables

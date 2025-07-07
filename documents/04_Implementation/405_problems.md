@@ -42,9 +42,25 @@ This seemed to fix the issue.
 ```
 {% endraw %}
 
-
-
 ## Changes in Company Structure
+
+The addition of dedicated DB Agent servers delayed my project a bit too. I had to change most of the already setup application servers with certificates, for the new DB Agent servers. These servers are setup by another team that also works closely with AppDynamics. They installed certificates with the DB Collector password themselves, but this made it so that the command I was using to display said password, now displayed a different part of the certificate, since they changed the path in which this was located. Red hat 7 and Red hat 8 servers also seemed to display the password in different orders.
+With this in mind, I checked every single system and noted down what command the password gets displayed by, and made the "if" condition below, which depending on the server runtime, selects one or another command.
+
+{% raw %}
+```yaml
+  - name: get_password
+    shell: |
+      if [[ "{{ runtime }}" =~ ^(R0|R7|P0|P7)$ ]]; then
+        op pisashowpw|grep -i /certificate/path.jks | awk '{print $9}'
+      elif [[ "{{ runtime }}" == "P2" ]]; then
+        op pisashowpw|grep -i /certificate/path.jks | awk '{print $8}'
+      else
+        op pisashowpw|grep -i /certificate/path.jks | awk '{print $7}'
+      fi
+    register: passwort
+```
+{% endraw %}
 
 ### Keystore path changes
 
