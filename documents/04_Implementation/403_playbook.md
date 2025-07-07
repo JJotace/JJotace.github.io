@@ -32,7 +32,7 @@ In order for a database collector to be created, I will need a few different pie
 
 As I have made this project for my company, I am not allowed to share the entirety of the code, as to not breach any security of privacy policies, but I will share bits and pieces and explain every part of it within this documentation.
 
-- The name of the playbook is defined within the first line, "oracleansible-ops" - every playbook needs to end in "-ops" hence this addition to the name.
+- The name of the playbook is defined within the first line, "oracleansible-ops" as per company guidelines.
 - It will run locally in the ansible controller as specified within the hosts section with "localhost".
 - Gather facts is a default in every playbook, but in this case it is not needed, so I have left it in but commented out for completion purposes.
 - tasks defines the start of the playbook and the actions it will take.
@@ -110,6 +110,170 @@ It also displays the value saved in the variable for verification purposes.
      msg: "runtime is {{ runtime }}"
 ```
 {% endraw %}
+
+The password for the database collector is stored within a certificate created in one server of each environment, since the ansible controller can only access as root in a server in the same runtime.
+For example, an R0 (Swiss Test 2) ansible controller can only gain root in an R0 server.
+The below "if" condition was added because some of these servers are still on red hat 7, while others are in red hat 8, and others got their certificate created by a different team after the addition of the dedicated on-prem DB Agent servers, so the password output gets printed in different lines when executing the same command.
+
+After printing the password, it gets saved in the variable "passwort".
+{% raw %}
+```yaml
+  - name: get_password
+    shell: |
+      if [[ "{{ runtime }}" =~ ^(R0|R7|P0|P7)$ ]]; then
+        op pisashowpw|grep -i /certificate/path.jks | awk '{print $9}'
+      elif [[ "{{ runtime }}" == "P2" ]]; then
+        op pisashowpw|grep -i /certificate/path.jks | awk '{print $8}'
+      else
+        op pisashowpw|grep -i /certificate/path.jks | awk '{print $7}'
+      fi
+    register: passwort
+```
+{% endraw %}
+
+During the testing phase I used the debugging option to make sure the password was being saved correctly, but when removing this password log, I noticed the password was not being stored at all.
+To solve this I left the debugging within the code, but set the "no_log" to true.
+{% raw %}
+```yaml
+  - name: Debug password
+    debug:
+     var: passwort
+    no_log: true
+```
+{% endraw %}
+
+### Collector creation
+
+For the creation of the DB Collectors, all environments are sepparated in sections within the code, the below example is for CX and I4 (dev and te1), which have their databases hosted within the same AppDynamics instance.
+The ansible controller executes the curl command generating a password token and sending out the json configuration file to be added as a new DB Collector. 
+For security reasons I have censored some of the values.
+
+{% raw %}
+```yaml
+  - name: create_collector_dev_te1
+    shell: |
+     password=''
+     json_output_access_token=$(curl -v -X POST -H "Content-Type: application/x-www-form-urlencoded" "https://appdynamics-xxx-te1-nch-a-azure.xxx.net/controller/api/oauth/access_token" -d 'grant_type=client_credentials&client_id=db_client@customer1&client_secret=xxx')
+     filtered_output_access_token=$(echo $json_output_access_token | grep -o '"access_token": *"[^"]*"' | sed 's/"acces_token": *"//;s/"//g' | awk -F ":" '{print $2}' )
+     echo $filtered_output_access_token
+     curl -v -X POST 'http://appdynamics-xxx-te1-nch-a-azure.xxx.net:XXXX/controller/rest/databases/collectors/create' \
+     -H 'Content-type: application/json' \
+     -H 'Accept: application/json' \
+     -H 'Authorization: Bearer '"$filtered_output_access_token"'' \
+     -d '{
+     "id":"",
+     "version":0,
+     "name":"{{ collector_name }}",
+     "nameUnique":true,
+     "builtIn":false,
+     "createdBy":null,
+     "createdOn":"",
+     "modifiedBy":null,
+     "modifiedOn":"",
+     "type":"ORACLE",
+     "hostname":"",
+     "useWindowsAuth":false,
+     "username":"",
+     "password":"",
+     "port":0,
+     "loggingEnabled":true,
+     "enabled":true,
+     "excludedSchemas":null,
+     "jdbcConnectionProperties":[
+     {
+        "key":"oracle.net.ssl_server_dn_match",
+        "value":"false",
+        "redact":false
+     },
+     {
+        "key":"oracle.net.crypto_checksum_client",
+        "value":"REJECTED",
+        "redact":false
+     },
+     {
+        "key":"oracle.net.crypto_checksum_types_client",
+        "value":"SHA1,MD5",
+        "redact":false
+     },
+     {
+        "key":"oracle.net.encryption_client",
+        "value":"REJECTED",
+        "redact":false
+     },
+     {
+        "key":"oracle.net.ssl_client_authentication",
+        "value":"true",
+        "redact":false
+     },
+     {
+        "key":"oracle.net.authentication_services",
+        "value":"TCPS",
+        "redact":false
+      }
+     ],
+     "databaseName":"",
+     "failoverPartner":"",
+     "connectAsSysdba":false,
+     "useServiceName":false,
+     "sid":"",
+     "customConnectionString":"jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCPS)(HOST = {{ host }} )(PORT = {{ port }})))(CONNECT_DATA = (SERVICE_NAME = {{ database_name }}))  (SECURITY = (SSL_SERVER_CERT_DN = \"{{ ssl_cert }},OU=OracleDB,OU=CA,O=XXX,C=CH\")))",
+     "enterpriseDB":false,
+     "useSSL":false,
+     "enableOSMonitor":false,
+     "hostOS":null,
+     "useLocalWMI":false,
+     "hostDomain":null,
+     "hostUsername":null,
+     "hostPassword":"",
+     "dbInstanceIdentifier":null,
+     "region":null,
+     "certificateAuth":false,
+     "removeLiterals":true,
+     "sshPort":0,
+     "agentName":"Default Database Agent",
+     "dbCyberArkEnabled":false,
+     "dbCyberArkApplication":null,
+     "dbCyberArkSafe":null,
+     "dbCyberArkFolder":null,
+     "dbCyberArkObject":null,
+     "hwCyberArkEnabled":false,
+     "hwCyberArkApplication":null,
+     "hwCyberArkSafe":null,
+     "hwCyberArkFolder":null,
+     "hwCyberArkObject":null,
+     "orapkiSslEnabled":true,
+     "orasslClientAuthEnabled":true,
+     "orasslTruststoreLoc":"/certificate/path.jks",
+     "orasslTruststoreType":"JKS",
+     "orasslTruststorePassword":"{{ passwort.stdout }}",
+     "orasslKeystoreLoc":"/certificate/path.jks",
+     "orasslKeystoreType":"JKS",
+     "orasslKeystorePassword":"{{ passwort.stdout }}",
+     "ldapEnabled":true,
+     "customMetrics":null,
+     "subConfigs":[
+
+     ],
+     "jmxPort":0,
+     "backendIds":[
+
+     ],
+     "extraProperties":[
+
+     ]
+     }'
+```
+{% endraw %}
+
+At the end of the json file this condition is applied right after, so that the correct AppDynamics link can be used to connect and create the collector.
+For the rest of environments it works the same, curl command with the json file gets added with a different AppDynamics link for the specific environment and a when condition at the end so the correct runtime gets selected.
+{% raw %}
+```yaml
+    when: runtime in ['CX', 'I4']
+ ```
+{% endraw %}
+
+
 
 ### JBDC String
 
