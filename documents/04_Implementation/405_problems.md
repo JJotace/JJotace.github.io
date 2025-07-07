@@ -34,6 +34,7 @@ While testing the playbook, the password for the database collector was being lo
 After some testing, I added a "no_log" condition at the end of the debugging, and set it to true, so that it would not show up in the output.
 This seemed to fix the issue.
 
+{% raw %}
 ```yaml
   - name: Debug password
     debug:
