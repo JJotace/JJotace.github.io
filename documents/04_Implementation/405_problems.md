@@ -25,7 +25,7 @@ Now the next option would be to create a certificate within an application serve
 
 This was the final solution, now for every environment there is one server with a certificate installed, which gets accessed by the ansible controller as root and reads and copies the password.
 
-This whole situation cost a lot of time to figure out and fix for the project.
+This situation cost a lot of project time trying to figure out and fix.
 
 ### Password logging
 

@@ -13,7 +13,9 @@ AppDynamics is used for the monitoring of applications, servers and databases wi
 
 ## Database overview in AppDynamics
 
+This is our monitoring overview for the databases. Within this overview we can see things such as network, resource usage and volume of traffic.We can also go deeper and check out the number of transactions and which type of transactions get used the most, how many resources they consume and how long they take to be implemented, which is exatly what we aim to check. Thanks to the addition of the overview to our databases, we have been able to detect slow running transactions and improved them by, for example, adding new indexes.
 
+![Monitoring_Overview](../../resources/images/Collector_3hourview.PNG)
 
 ## Curl command
 
