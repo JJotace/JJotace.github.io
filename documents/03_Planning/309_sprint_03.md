@@ -7,9 +7,9 @@ nav_order: 9
 
 # Sprint 3 Review
 
-**Date**: 07.07.2025 **Location**: Microsoft Teams
-**Participants**
+**Date**: 09.07.2025 **Location**: Microsoft Teams
 
+**Participants**
 Student: Juan Cardoso
 PRJ SME: Caesar Roth
 IAC SME: Armin Dörzbach

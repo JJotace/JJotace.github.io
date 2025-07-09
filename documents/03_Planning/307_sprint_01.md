@@ -7,7 +7,10 @@ nav_order: 7
 
 # Sprint 1 Review
 
+**Date**: 31.05.2025 **Location**: Microsoft Teams
+
 **Participants**
+
 Student: Juan Cardoso
 PRJ SME: Caesar Roth
 IAC SME: Armin Dörzbach
