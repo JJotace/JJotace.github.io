@@ -10,6 +10,7 @@ nav_order: 9
 **Date**: 09.07.2025 **Location**: Microsoft Teams
 
 **Participants**
+
 Student: Juan Cardoso
 PRJ SME: Caesar Roth
 IAC SME: Armin Dörzbach
