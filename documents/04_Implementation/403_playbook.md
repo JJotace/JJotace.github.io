@@ -287,3 +287,17 @@ This string is coded into my playbook with help of the extra vars above as follo
 jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCPS)(HOST = {{ host }} )(PORT = XXXX)))(CONNECT_DATA = (SERVICE_NAME = {{ database_name }}))  (SECURITY = (SSL_SERVER_CERT_DN = \"{{ ssl_cert }},OU=OracleDB,OU=CA,O=XXX,C=CH\")))
 ```
 {% endraw %}
+
+### Testing and executing the playbook
+
+The testing was done via our release executor REX. Thanks to counting with full admin rights for the ansible controllers, testing and fixing things was easy, since I could always just change a few lines and run again at anytime without the need of any approvals or anybody changing the code for me. Below is a screenshot of a portion of the output after a successful run of the playbook.
+
+![R0_Final_Test](../../resources/images/Rex_completed2.PNG)
+
+### Internal doucumentation
+
+An internal documentation was written with the purpose of guiding my colleagues on how to use this playbook to onboard the databases assigned to their respective applications.The guide includes a description of the different values that the JCBD string is made of and where to find these within our internal tools.
+
+The playbook with extra vars and other required information like the playbook name are saved within a link in the guide that I provided to speed up the process for my peers. I also added an example of a playbook I had previously executed so that they can easily see and compare the information they need to give in and avoid unnecessary questions and double checking from my side.
+
+![Internal_Documentation](../../resources/images/Internal_Documentation.PNG)

@@ -46,5 +46,9 @@ Nothing has changed so far.
 
 Backlog for the next sprint is shown within the "Timeline" section.
 
+## Review
+
+The first sprint has been completed. Most of the code has been written and tested with at least one successful run. So far there are no problems encountered. The documentation is still yet to be done. The code still needs to be improved and throughout testing needs to be done for every environment. The project has not yet been shared with stakeholders and SME's.
+
 
 

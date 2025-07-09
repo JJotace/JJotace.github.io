@@ -12,7 +12,7 @@ Student: Juan Cardoso
 PRJ SME: Caesar Roth
 IAC SME: Armin Dörzbach
 
-During the Sprint 2 a call was organized between between the project SME Caesar Roth and the Student Juan Cardoso. During this call the current progress was overviewed and tips were given to ensure the success and quality of the project.
+During the Sprint 2, a call was organized between the project SME Caesar Roth and the Student Juan Cardoso. During this call the current progress was overviewed and tips were given to ensure the success and quality of the project.
 
 ### Project Progress
 
@@ -22,7 +22,7 @@ During the Sprint 2 a call was organized between between the project SME Caesar 
 
 ### Timeline
 
-![Sprint_01](../../resources/images/Sprint02_Jira.png)
+![Sprint_02](../../resources/images/Sprint02_Jira.png)
 
 ### Status of the project
 - **Creation of the projects structure:** All necessary directories have been created in the ansible controllers of each environment.
@@ -47,6 +47,10 @@ Nothing has changed so far.
 ### Backlog
 
 Backlog for the next sprint is shown within the "Timeline" section.
+
+## Review
+
+The second sprint has been completed. Little of the documentation is left to be written, which has already been alotted into the third and final sprint, along with fixes to playbook, at hand of the current problems that have arised during the sprint. SME's and stakeholders have been informed of the progress and have reviewed the product created so far.
 
 
 
