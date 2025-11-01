@@ -1,0 +1,10 @@
+title: Sem02
+description: "Server Monitoring Dashboard"
+remote_theme: just-the-docs/just-the-docs
+
+url: https://JJotace.github.io/
+
+aux_links:
+  JIRA Project: https://jjotace.atlassian.net/jira/software/projects/SMD/summary
+
+footer_content: "Juan Cardoso - Sem02 - Technische Berufsschule Zürich - Cloud Native Engineering - 2025"
