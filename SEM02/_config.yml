@@ -8,3 +8,6 @@ aux_links:
   JIRA Project: https://jjotace.atlassian.net/jira/software/projects/SMD/summary
 
 footer_content: "Juan Cardoso - Sem02 - Technische Berufsschule Zürich - Cloud Native Engineering - 2025"
+
+search_enabled: true
+heading_anchors: true
