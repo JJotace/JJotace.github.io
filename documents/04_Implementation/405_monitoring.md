@@ -1,12 +1,11 @@
 ---
 layout: default
-title: 4.3 Playbook
+title: 4.5 Monitoring
 parent: 4. Implementation
-nav_order: 3
+nav_order: 5
 ---
 
-# 4.3 Ansible Playbook
+# 4.5 Monitoring
 
 ## Introduction
-
 
