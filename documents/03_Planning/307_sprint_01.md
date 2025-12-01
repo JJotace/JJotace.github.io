@@ -7,7 +7,7 @@ nav_order: 7
 
 # Sprint 1 Review
 
-**Date**:  **Location**: Microsoft Teams
+**Date**: 12.01.2025  **Location**: Microsoft Teams
 
 **Participants**
 
@@ -19,9 +19,9 @@ IAC SME: Armin Dörzbach
 
 ### Project Progress
 
-- **Implementation:** 
-- **Documentation:** 
-- **Testing & Fixing:** 
+- **Planning:** 100%
+- **Implementation:** 0%
+- **Documentation:** 20%
 
 ### Timeline
 

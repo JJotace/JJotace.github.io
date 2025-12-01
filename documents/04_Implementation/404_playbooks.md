@@ -8,5 +8,3 @@ nav_order: 4
 # 4.3 Ansible Playbook
 
 ## Introduction
-
-

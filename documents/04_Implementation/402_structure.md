@@ -61,3 +61,53 @@ drwxr-xr-x 2 frost frost 4.0K Nov 12 10:46 group_vars
 -rw-r--r-- 1 frost frost    0 Nov 12 10:49 README.md
 -rw-r--r-- 1 frost frost  508 Nov 12 10:58 inventory.yml
 -rw-r--r-- 1 frost frost  335 Nov 12 11:09 ansible.cfg
+
+## AWS Configuration
+
+### Security Groups
+
+**Security Group 1:** monitoring-sg
+Controls access to the monitoring server (Prometheus + Grafana)
+
+Inbound Rules:
+
+- SSH (Port 22) - TCP
+- Grafana (Port 3000) - TCP
+- Prometheus Web UI (Port 9090) - TCP
+- Node Exporter (Port 9100) - TCP
+
+Outbound Rules:
+
+- Allow all traffic (default)
+
+**Security Group 2:** target-sg
+Purpose: Controls access to target servers (run Node Exporter only)
+Inbound Rules:
+
+- SSH (Port 22) - TCP
+- Node Exporter (Port 9100) - TCP
+
+Outbound Rules:
+
+- Allow all traffic (default)
+
+
+### EC2 Instances
+
+**Instance 1:** monitoring-server
+Name Tag: monitoring-server
+AMI: Ubuntu Server 22.04 LTS
+Instance Type: t2.micro
+Security Group: monitoring-sg
+Key Pair: aws-key
+
+
+**Instances 2 & 3:** target-server-1 & target-server-2
+Name Tags: target-server-1, target-server-2
+AMI: Ubuntu Server 22.04 LTS
+Instance Type: t2.micro
+Security Group: target-sg
+Key Pair: aws-key
+
+
+
