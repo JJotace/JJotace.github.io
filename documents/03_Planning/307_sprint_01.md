@@ -16,7 +16,6 @@ PRJ SME: Corrado Parisi
 IAC SME: Armin Dörzbach
 
 
-
 ### Project Progress
 
 - **Planning:** 100%
@@ -25,7 +24,7 @@ IAC SME: Armin Dörzbach
 
 ### Timeline
 
-
+![Sprint_1_Timeline_Finished](../../resources/images/Sprint1_Finished.png)
 
 ### Status of the project
 
@@ -41,6 +40,7 @@ IAC SME: Armin Dörzbach
 
 ### Backlog
 
+![Sprint_1_Backlog_Finished](../../resources/images/Sprint1_finished_Backlog.png)
 
 ## Review
 
