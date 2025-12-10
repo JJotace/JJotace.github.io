@@ -46,7 +46,7 @@ The files are then moved into the /usr/local/bin, standard for Linux.
 # Move the binary to the right place
 - name: Copy Node Exporter binary
   copy:
-    src: /tmp/node_exporter-1.7.0.linux-amd64/node_exporter
+    src: /tmp/node_exporter-1.10.2.linux-amd64/node_exporter
     dest: /usr/local/bin/node_exporter
     mode: '0755'
     remote_src: yes
