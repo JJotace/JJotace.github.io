@@ -137,12 +137,6 @@ WantedBy=multi-user.target
 - GitHub: https://github.com/prometheus/node_exporter
 - Latest Release: https://github.com/prometheus/node_exporter/releases/latest
 
-## Prometheus
-- Installation: https://prometheus.io/docs/prometheus/latest/installation/
-- Configuration: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
-- GitHub: https://github.com/prometheus/prometheus
-- Latest Release: https://github.com/prometheus/prometheus/releases/latest
-
 ## Grafana
 - Installation: https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/
 - Configuration: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
