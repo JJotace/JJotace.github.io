@@ -36,17 +36,32 @@ This project serves as a learning experience in basic DevOps skills while solvin
 
 ### Project Goals (SMART)
 
-- **Specific**: 
+- **Specific**: Deploy a complete monitoring infrastructure consisting of Prometheus and Grafana on one server, with Node Exporter running on two target servers, all configured through Ansible playbooks.
+
 - **Measurable**: 
-- **Attractive**:
-- **Realistic**: 
-- **Timed**: 
+- All three servers must be fully configured via Ansible with zero manual steps.
+- Prometheus must successfully scrape metrics from both target servers.
+- Grafana must display at least one functional dashboard showing real-time CPU, memory, disk, and network metrics.
+- The complete deployment must be reproducible by running a single playbook command
+
+- **Attractive**: Learn valuable DevOps skills (Ansible, Prometheus, Grafana) while building a project that demostrates Infrastructure as a Code best practices.
+
+- **Realistic**: Uses free-tier/low-cost AWS resources, open-source tools with extensive documentation, and a clear sprint timeline with achievable milestones. The technology stack is widely used in production environments, with plenty of learning resources available.
+
+- **Timed**: The complete project can be completed within 50 hours of work across 3 main Sprints, including a Sprint 0 to help set up the environment before the start.
+- Sprint 0: 1 Week
+- Sprint 1: 1 Month
+- Sprint 2: 1 Month
+- Sprint 3: 1 Month
+
 
 ## Steps
 
 The project will be executed in four main phases:
 
-**Sprint 1 - Planning & Setup**: Set up the environment, create the project structure, plan and describe epics, user stories and tasks within Jira and create barebone playbooks.
+**Sprint 0 - Initial Setup**: Set up the environment installing all necessary software and prepapre working tools and repositories.
+
+**Sprint 1 - Planning & Setup**: Create the project structure, plan and describe epics, user stories and tasks within Jira and create barebone playbooks and documentation structure.
 
 **Sprint 2 - Implementation**: Create Ansible roles for each component (Node Exporter, Prometheus, Grafana), create EC2 instances and templates and deploy these components to the servers. The Node Exporter will expose the metrics from the target servers and Prometheus will collect the data, while Grafana will make it visual via dashboards. Testings to verify that everything works correctly will be executed by the end of the sprint once everything is created and installed.
 
