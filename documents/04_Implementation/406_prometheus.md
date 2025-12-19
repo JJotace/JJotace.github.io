@@ -1,11 +1,11 @@
 ---
 layout: default
-title: 4.7 Prometheus
+title: 4.6 Prometheus
 parent: 4. Implementation
-nav_order: 7
+nav_order: 6
 ---
 
-# 4.7 Prometheus
+# 4.6 Prometheus
 
 Prometheus is the data collector and storage engine.
 It does several things:
@@ -183,4 +183,11 @@ RestartSec=5
 - Systemd documentation: https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html?__goaway_challenge=meta-refresh&__goaway_id=56a163db49b5f793713314165e744b91&__goaway_referer=https%3A%2F%2Fclaude.ai%2F
 
 
+### Prometheus Handler - main.yml
 
+---
+- name: restart prometheus
+  systemd:
+    name: prometheus
+    state: restarted
+    daemon_reload: yes

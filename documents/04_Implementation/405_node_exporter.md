@@ -1,21 +1,15 @@
 ---
 layout: default
-title: 4.4 Playbook
+title: 4.5 Node Exporter
 parent: 4. Implementation
-nav_order: 4
+nav_order: 5
 ---
 
-# 4.3 Ansible Playbooks
+# 4.5 Node Exporter
 
-# Introduction
+## Introduction
 
-
-# Node Exporter
-
-**Node Exporter Introduction text**
-
-
-### Main task ```roles/node-exporter/tasks/main.yml``` 
+## Main task ```roles/node-exporter/tasks/main.yml``` 
 
 Installs the Node Exporter files directly from the github, using the latest available version as of the time of writing this.
 
@@ -87,7 +81,7 @@ Stars the Node Exporter (during the task) and makes it start on boot - differenc
     daemon_reload: yes
 ```
 
-### Handler ```roles/node-exporter/handlers/main.yml``` 
+## Handler ```roles/node-exporter/handlers/main.yml``` 
 Handlers run when notified by a task, whenever the config file changes, it will restart the service.
 
 ```yaml
@@ -99,7 +93,7 @@ Handlers run when notified by a task, whenever the config file changes, it will 
     daemon_reload: yes
 ``` 
 
-### Service Template ```roles/node-exporter/templates/node_exporter.service.j2```
+## Service Template ```roles/node-exporter/templates/node_exporter.service.j2```
 
 This file tells the systemd (Ubuntu service maanger) how to run the Node Exporter.
 In this case, it will wait for the network to be up before starting the service.
@@ -118,32 +112,3 @@ ExecStart=/usr/local/bin/node_exporter
 [Install]
 WantedBy=multi-user.target
 ``` 
-
-# Prometheus
-
-
-
-
-
-
-# Grafana & Dashboards
-
-
-
-# Documentation References
-
-## Node Exporter
-- Installation: https://prometheus.io/docs/guides/node-exporter/
-- GitHub: https://github.com/prometheus/node_exporter
-- Latest Release: https://github.com/prometheus/node_exporter/releases/latest
-
-## Grafana
-- Installation: https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/
-- Configuration: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
-- API Docs: https://grafana.com/docs/grafana/latest/developers/http_api/
-
-## Project current setup:
-- Binary locations: `/usr/local/bin/` (as per Prometheus docs)
-- Config locations: `/etc/` (as per official docs)
-- Data locations: `/var/lib/` (as per official docs)
-

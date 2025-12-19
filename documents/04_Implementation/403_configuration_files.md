@@ -9,6 +9,8 @@ nav_order: 3
 
 ## Introduction
 
+The configuration files for the main directory /SEM02 are consolidated and described within this section of the documentation.
+
 ## Configuration Files
 
 ### Ansible-Configuration (`ansible.cfg`) 
@@ -17,52 +19,62 @@ nav_order: 3
 inventory = inventory.yml
 host_key_checking = False
 retry_files_enabled = False
+log_path = ./ansible.log
 
 [privilege_escalation]
 become = True
 ```
 
 ### Inventory File (`inventory.yml`)
+
+The IPs must be replaced everytime new instances are created in AWS.
+
  ```yaml
 ---
 all:
   vars:
     ansible_user: ubuntu
-    ansible_ssh_private_key_file: ~/.ssh/aws-monitoring-key.pem
+    ansible_ssh_private_key_file: ~/.ssh/aws-key.pem
     ansible_python_interpreter: /usr/bin/python3
 
   children:
-    monitoring: # Monitoring server group
+    monitoring:
       hosts:
         monitoring-server:
-          ansible_host: <MONITORING_SERVER_PUBLIC_IP>
+          ansible_host: <IP>
+          private_ip: <IP>
 
-    targets: # Target servers group
+    targets:
       hosts:
         target-server-1:
-          ansible_host: <TARGET_SERVER_1_PUBLIC_IP>
+          ansible_host: <IP>
+          private_ip: <IP>
         target-server-2:
-          ansible_host: <TARGET_SERVER_2_PUBLIC_IP>
+          ansible_host: <IP>
+          private_ip: <IP>
 ```
 
 ### Main Playbook (`main.yml`)
+
+This is the main playbook, this is what gets executed in order to trigger every task.
+
 ```yaml
 ---
 - name: Deploy Node Exporter to target servers
   hosts: targets
+  become: true
   roles:
     - node-exporter
 
 - name: Deploy Prometheus to monitoring server
   hosts: monitoring
+  become: true
   roles:
     - prometheus
 
 - name: Deploy Grafana to monitoring server
   hosts: monitoring
+  become: true
   roles:
     - grafana
 ```
-
-
-## Monitoring Server Setup

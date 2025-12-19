@@ -1,14 +1,15 @@
 ---
 layout: default
-title: 4.5 EC2 Instances
+title: 4.4 EC2 Instances
 parent: 4. Implementation
-nav_order: 5
+nav_order: 4
 ---
 
-# 4.5 EC2 Instances
+# 4.4 EC2 Instances
 
 ## Introduction
 
+Within this section, the EC2 instances and their configuration are displayed and explained.
 
 
 # Configuration and Creation
