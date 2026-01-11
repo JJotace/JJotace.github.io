@@ -14,7 +14,7 @@ With Kanban, I can easily visualize all the tasks on a board, making it simple t
 
 Combining this with Scrum's structure, planning work in Sprints and reviewing the progress regularly creates a balance  between planning and being able to react to changes quickly. Jira supports this by allowing the updating of the board, moving tasks between columns and tracking progress in real time.
 
-![Sprint_overview](../../resources/images/Sprint_Scrum.png)
+![Sprint_overview](../../resources/images/sprint_overview.png)
 
 
 ## Sprint
