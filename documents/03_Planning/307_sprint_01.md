@@ -28,6 +28,8 @@ IAC SME: Armin Dörzbach
 
 ### Status of the project
 
+Currently most of the project has been planned within the Jira page, including sprints, epics, user stories and tasks with their respective descriptions.
+
 
 ### Project Goals
 
@@ -44,7 +46,7 @@ IAC SME: Armin Dörzbach
 
 ## Review
 
-
+Due to time constrains and team availability, the planning phase within the documentation has not advanced as much as it was previously planned.
 
 
 

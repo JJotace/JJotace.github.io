@@ -24,7 +24,7 @@ Scrum Master: The Scrum Master ensures the team follows the Agile project manage
 #  Subject Matter Expert (SME)
 
 The SME is the assigned expert for the project, which thanks to their wide knowledge will be able to assist and support its development.
-Armin D. is the assigned SME for IAC, and Caesar Roth oversees the project management.
+Armin D. is the assigned SME for IAC, and Corrado Parisi oversees the project management.
 
 # Business Owner (BO) & Stakeholder
 
