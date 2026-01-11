@@ -5,48 +5,78 @@ parent: 3. Planning
 nav_order: 7
 ---
 
-# Sprint 1 Review
+# Sprint 1 Review & Retrospective
 
-**Date**: 12.01.2025  **Location**: Microsoft Teams
+**Date**: 12.01.2025  
+**Location**: Microsoft Teams
 
-**Participants**
+**Participants**:
+* Student: Juan Cardoso
+* PRJ SME: Corrado Parisi
+* IAC SME: Armin Dörzbach
 
-Student: Juan Cardoso
-PRJ SME: Corrado Parisi
-IAC SME: Armin Dörzbach
+---
 
+### Progress Overview
 
-### Project Progress
+* Documentation: 20%
+* Implementation: 0%
+* Presentation: 0%
 
-- **Planning:** 100%
-- **Implementation:** 0%
-- **Documentation:** 20%
+---
 
 ### Timeline
 
 ![Sprint_1_Timeline_Finished](../../resources/images/Sprint1_Finished.png)
 
+---
+
 ### Status of the project
 
-Currently most of the project has been planned within the Jira page, including sprints, epics, user stories and tasks with their respective descriptions.
+* **Jira Setup**: Project structure complete with 4 epics and 13 user stories across all sprints.
+* **AWS Infrastructure Design**: Security groups defined, EC2 specifications documented.
+* **Ansible Configuration**: ansible.cfg and inventory.yml created following best practices. Directory structure established with role placeholders.
+* **Documentation**: Bare bones documentation and layout created.
+* **Questions for Experts**: None.
 
+---
 
-### Project Goals
+### Comparison to Project Goals
 
+* **Project Goals**: Mostly on track. Planning phase complete as scheduled.
+* **Sprint 1 Objectives**: All stories completed successfully.
+
+---
+
+### Keep / Try / Drop
+
+**Keep**:
+**Try**: Regular communication with project SMEs.
+**Drop**: Nothing.
+
+---
 
 ### To do
 
+* **Implementation**: Provision EC2 instances and begin with the Implementation part of the project in Sprint 2.
+* **Documentation**: Continue documenting project progress.
+* **Testing**: Test Ansible connectivity and Grafana functionanlity once instances are running and packages have been deployed.
 
-### Problems
+---
 
+### Issues Encountered
+
+* **AWS Budget Constraints**: Student account limited to $50. Instances will be provisioned only when actively needed.
+* **Time management:** There were no major problems except for a 
+* **Learning Curve**: First time working with Ansible outside of already existing work environment & first time working with Grafana.
 
 ### Backlog
 
-![Sprint_1_Backlog_Finished](../../resources/images/Sprint1_finished_Backlog.png)
+![Sprint_1_Backlog](../../resources/images/Sprint1_finished_Backlog.png)
 
-## Review
+## Retrospective Notes
 
-Due to time constrains and team availability, the planning phase within the documentation has not advanced as much as it was previously planned.
+Sprint 1 focused mostly on planning and setting up the environment structure and files. All planned stories were completed. It was decided to not begin any of the AWS provisioning until Sprint 2 to help with cost managmeent, but this does not impact the project timeline. The team is ready to begin the implementation and counts with a clear structure and planning. The documentation is currently lacking due to time constrains, but this will be fixed within Sprint 3. More communication between the project lead and the project SMEs should have ocurred to offer a bit of transparency and let the stakeholders know of the current progress.
 
 
 
