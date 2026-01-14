@@ -18,9 +18,7 @@ It does several things:
 
 # Playbooks
 
-## Main Task
-
-```roles/prometheus/tasks/main.yml```
+## Main Task ```roles/prometheus/tasks/main.yml```
 
 ```yaml
 ---
@@ -114,9 +112,7 @@ It does several things:
     state: absent
 ```
 
-## Templates
-
-### ```roles/prometheus/templates/prometheus.yml.j2```
+## Prometheus Monitoring Template ```roles/prometheus/templates/prometheus.yml.j2```
 
 
 ```yaml
@@ -145,13 +141,13 @@ scrape_configs:
 {% endfor %}
 ```
 
-### ```roles/prometheus/templates/prometheus.service.j2```
+## Prometheus Service Tmemplate ```roles/prometheus/templates/prometheus.service.j2```
 
-This file does several things.
+This file does a few things.
 
-- Describing the process
-- Prometheus starts after the network is ready
-- 
+- Describes the process
+- Tells Promtheus to start only after the network is ready
+
 
 ```ini
 [Unit]
@@ -174,16 +170,7 @@ Restart=always
 RestartSec=5
 ```
 
-
-# Documentation References
-
-- Guide: https://prometheus.io/docs/introduction/overview/
-- GitHub: https://github.com/prometheus/prometheus
-- Latest Release: https://github.com/prometheus/prometheus/releases/latest
-- Systemd documentation: https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html?__goaway_challenge=meta-refresh&__goaway_id=56a163db49b5f793713314165e744b91&__goaway_referer=https%3A%2F%2Fclaude.ai%2F
-
-
-### Prometheus Handler - main.yml
+## Prometheus Handler ```roles/prometheus/handlers/main.yml```
 
 ---
 - name: restart prometheus
@@ -191,3 +178,10 @@ RestartSec=5
     name: prometheus
     state: restarted
     daemon_reload: yes
+
+# Documentation References
+
+- Guide: https://prometheus.io/docs/introduction/overview/
+- GitHub: https://github.com/prometheus/prometheus
+- Latest Release: https://github.com/prometheus/prometheus/releases/latest
+- Systemd documentation: https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html?__goaway_challenge=meta-refresh&__goaway_id=56a163db49b5f793713314165e744b91&__goaway_referer=https%3A%2F%2Fclaude.ai%2F
