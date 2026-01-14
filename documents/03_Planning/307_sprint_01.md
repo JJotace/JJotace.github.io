@@ -50,9 +50,9 @@ nav_order: 7
 
 ### Keep / Try / Drop
 
-**Keep**:
-**Try**: Regular communication with project SMEs.
-**Drop**: Nothing.
+* **Keep**:
+* **Try**: Regular communication with project SMEs.
+* **Drop**: Nothing.
 
 ---
 

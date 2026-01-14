@@ -29,25 +29,22 @@ monitoring-project/
     ├── node-exporter/
     │   ├── tasks/
     │   ├── templates/
-    │   ├── handlers/
-    │   └── files/
+    │   └── handlers/
     ├── prometheus/
     │   ├── tasks/
     │   ├── templates/
-    │   ├── handlers/
-    │   └── files/
+    │   └── handlers/
     └── grafana/
         ├── tasks/
         ├── templates/
-        ├── handlers/
-        └── files/
+        └── handlers/
 ```
 
 **Creating project structure**
 ```
 sudo mkdir SEM02
 chown frost:frost SEM02
-mkdir -p roles/{node-exporter,prometheus,grafana}/{tasks,templates,handlers,files}
+mkdir -p roles/{node-exporter,prometheus,grafana}/{tasks,templates,handlers}
 mkdir group_vars host_vars
 touch ansible.cfg
 touch inventory.yml
@@ -100,22 +97,20 @@ Outbound Rules:
 ### EC2 Instances
 
 **Instance 1:** monitoring-server
-```
-Name Tag: monitoring-server
-AMI: Ubuntu Server 22.04 LTS
-Instance Type: t2.micro
-Security Group: monitoring-sg
-Key Pair: aws-key
-```
 
-**Instances 2 & 3:** target-server-1 & target-server-2
-```
-Name Tags: target-server-1, target-server-2
-AMI: Ubuntu Server 22.04 LTS
-Instance Type: t2.micro
-Security Group: target-sg
-Key Pair: aws-key
-```
+- Name Tag: monitoring-server
+- AMI: Ubuntu Server 22.04 LTS
+- Instance Type: t2.micro
+- Security Group: monitoring-sg
+- Key Pair: aws-key
+
+**Instances 2 & 3:** target-server-1 & target-server-2\
+
+- Name Tags: target-server-1, target-server-2
+- AMI: Ubuntu Server 22.04 LTS
+- Instance Type: t2.micro
+- Security Group: target-sg
+- Key Pair: aws-key
 
 
 

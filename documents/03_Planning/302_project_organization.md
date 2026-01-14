@@ -7,7 +7,6 @@ nav_order: 2
 
 # 3.2 Project Organization
  
-
 # Definition of roles
 
 The project organization is defined as per the following image:
