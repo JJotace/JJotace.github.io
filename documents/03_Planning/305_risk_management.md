@@ -13,36 +13,67 @@ The biggest challenge for this project will be the learning curve for the softwa
 
 Another big risk that would halt the project as a whole would be running out of budget on AWS. Everytime something is being tested, new servers need to be deployed, and then removed. Forgetting even once to do this could cost most of the budget for the project if not all, depending on how many days this is left unatended.
 
-| **Risk**                           | **Likelihood** | **Severity**           | **Risk Rating** | **Category**   |
-|------------------------------------|:--------------:|:----------------------:|:---------------:|:--------------:|
-| AWS credit exhaustion              | 4 (Likely)     | 5 (Catastrophic)       | 20              | High           |
-| Lack of Ansible/monitoring knowledge | 5 (Very Likely)| 3 (Serious Impact)     | 15              | Medium         |
-| Time underestimation               | 4 (Likely)     | 3 (Serious Impact)     | 12              | Medium         |
-| Security misconfigurations         | 3 (Feasible)   | 4 (Major Impact)       | 12              | Medium         |
-| SSH connectivity issues            | 3 (Feasible)   | 3 (Serious Impact)     | 9               | Low            |
-| Work loss (no version control)     | 2 (Slight)     | 4 (Major Impact)       | 8               | Low            |
-
-**Legend:**
-- *Likelihood*:  
-  1 = Very unlikely  
-  2 = Slight  
-  3 = Feasible  
-  4 = Likely  
-  5 = Very likely  
-- *Severity*:  
-  1 = Minor  
-  2 = Significant  
-  3 = Serious  
-  4 = Major impact  
-  5 = Catastrophic/Fatal  
-- *Risk Rating*: Likelihood × Severity  
-- *Category*:  
-  - Minimal: 1-2  
-  - Low: 3-9  
-  - Medium: 10-15  
-  - High: 16-20  
-  - Extreme: 25  
+![Risk_Matrix](../../resources/images/Risk_Matrix.png)
 
 ## 3.5.1 Risk Management handling
 
 To manage the project risks, weekly meetings are held to review the current risk matrix and discuss any possible changes or new problems that might have come up. During these meetings, the risk likely-hood is reassesed to see if something within the project needs to be changed, or what the best course of action is in case any of these risks were to actually affect the project. This regular review helps with proactivity and helps adjusting plans quickly to minimize negative effects on the project and stay within the deadline.
+
+### Risks & Mitigation
+
+1. **AWS Credit Exhaustion** (High)
+
+**The Problem:** With only 50$ AWS student credit and 3 EC2 instances running, costs can quickly add up.
+
+**Mitigation Strategies:**
+- AWS Billing alert
+- Stop and delete instances after every work session
+- AWS Templates for quick instance deployment
+
+2. **SSH Connectivity Issues** (High)
+
+**The Problem:** Ansible depends entirely on SSH. If SSH doesn't work, nothing works.
+
+**Mitigation Strategies:**
+- Test SSH before Ansible
+- Verify Security Groups
+- Document working configuration
+
+3. **Insufficient Testing** (High)
+
+**The Problem:** Insufficient Testing
+
+**Mitigation Strategies:**
+- Validating syntax before running
+- Manual Verification Checklist
+- Incremental Deployment
+
+4. **Security Misconfiguration** (Medium)
+
+**The Problem:**  Exposing monitoring services to the public internet could allow unauthorized access.
+
+**Mitigation Strategies:**
+
+- Security Group Configuration
+- SSH Key Protection
+- Network Segmentation
+
+5. **Time Underestimation** (Medium)
+
+**The Problem:** Complex project with multiple technologies might take longer than the 50 hours estimated.
+
+**Mitigation Strategies:**
+
+- Identify Must-have features
+- Setting a time limit for tasks
+- Sprint Reviews
+
+6. **Lack of Ansible / Monitoring Knowledge** (Medium)
+
+**The Problem:** First time using Ansible outside of an already existing structure, and very firs ttime using Prometheus and Grafana.
+
+**Mitigation Strategies:**
+- Structured learning
+- One component at a time
+- Taking notes of problems and things learnt
+
