@@ -7,7 +7,7 @@ nav_order: 7
 
 # Sprint 1 Review & Retrospective
 
-**Date**: 12.01.2025  
+**Date**: 01.12.2025  
 **Location**: Microsoft Teams
 
 **Participants**:
@@ -45,6 +45,9 @@ nav_order: 7
 
 * **Project Goals**: Mostly on track. Planning phase complete as scheduled.
 * **Sprint 1 Objectives**: All stories completed successfully.
+  - SMD-10: Jira planning & setup
+  - SMD-16: AWS Infrastructure Design
+  - SMD-17: Ansible Configuration
 
 ---
 
