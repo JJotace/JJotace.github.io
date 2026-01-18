@@ -38,7 +38,7 @@ This project focuses on creating a fully automated server monitoring solution us
     * Data is retained for 24 hours
 
 3. **Data Visualization**
-    * Grafana provides a web-based dashboard via http://<monitoring-ip>:3000
+    * Grafana provides a web-based dashboard via http://< monitoring-ip >:3000
     * Dashboard displays comprehensive metrics
     * Real-time updates showing current system state
 

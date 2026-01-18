@@ -21,7 +21,7 @@ To manage the project risks, weekly meetings are held to review the current risk
 
 ### Risks & Mitigation
 
-1. **AWS Credit Exhaustion** (High)
+* **AWS Credit Exhaustion** (High)
 
 **The Problem:** With only 50$ AWS student credit and 3 EC2 instances running, costs can quickly add up.
 
@@ -30,7 +30,7 @@ To manage the project risks, weekly meetings are held to review the current risk
 - Stop and delete instances after every work session
 - AWS Templates for quick instance deployment
 
-2. **SSH Connectivity Issues** (High)
+* **SSH Connectivity Issues** (High)
 
 **The Problem:** Ansible depends entirely on SSH. If SSH doesn't work, nothing works.
 
@@ -39,7 +39,7 @@ To manage the project risks, weekly meetings are held to review the current risk
 - Verify Security Groups
 - Document working configuration
 
-3. **Insufficient Testing** (High)
+* **Insufficient Testing** (High)
 
 **The Problem:** Insufficient Testing
 
@@ -48,7 +48,7 @@ To manage the project risks, weekly meetings are held to review the current risk
 - Manual Verification Checklist
 - Incremental Deployment
 
-4. **Security Misconfiguration** (Medium)
+* **Security Misconfiguration** (Medium)
 
 **The Problem:**  Exposing monitoring services to the public internet could allow unauthorized access.
 
@@ -58,7 +58,7 @@ To manage the project risks, weekly meetings are held to review the current risk
 - SSH Key Protection
 - Network Segmentation
 
-5. **Time Underestimation** (Medium)
+* **Time Underestimation** (Medium)
 
 **The Problem:** Complex project with multiple technologies might take longer than the 50 hours estimated.
 
@@ -68,7 +68,7 @@ To manage the project risks, weekly meetings are held to review the current risk
 - Setting a time limit for tasks
 - Sprint Reviews
 
-6. **Lack of Ansible / Monitoring Knowledge** (Medium)
+* **Lack of Ansible / Monitoring Knowledge** (Medium)
 
 **The Problem:** First time using Ansible outside of an already existing structure, and very firs ttime using Prometheus and Grafana.
 

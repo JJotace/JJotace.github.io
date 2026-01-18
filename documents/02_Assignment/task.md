@@ -9,7 +9,7 @@ nav_order: 1
 
 ## Project Title
 
-Server Monitoring Dashboard
+### Server Monitoring Dashboard
 
 ## Starting Situation
 

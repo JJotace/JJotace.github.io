@@ -48,14 +48,6 @@ nav_order: 7
 
 ---
 
-### Keep / Try / Drop
-
-* **Keep**:
-* **Try**: Regular communication with project SMEs.
-* **Drop**: Nothing.
-
----
-
 ### To do
 
 * **Implementation**: Provision EC2 instances and begin with the Implementation part of the project in Sprint 2.
@@ -74,9 +66,9 @@ nav_order: 7
 
 ![Sprint_1_Backlog](../../resources/images/Sprint1_finished_Backlog.png)
 
-## Retrospective Notes
+## Sprint Retrospective
 
-Sprint 1 focused mostly on planning and setting up the environment structure and files. All planned stories were completed. It was decided to not begin any of the AWS provisioning until Sprint 2 to help with cost managmeent, but this does not impact the project timeline. The team is ready to begin the implementation and counts with a clear structure and planning. The documentation is currently lacking due to time constrains, but this will be fixed within Sprint 3. More communication between the project lead and the project SMEs should have ocurred to offer a bit of transparency and let the stakeholders know of the current progress.
+![Sprint_1_Retrospective](../../resources/images/Sprint1_retrospective.png)
 
 
 
