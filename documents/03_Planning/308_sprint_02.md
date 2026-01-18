@@ -69,11 +69,11 @@ nav_order: 8
 
 ### Backlog
 
-![Sprint_2_Backlog](../../resources/images/Sprint2_finished_Backlog.png)
+![Sprint_2_Backlog](../../resources/images/Sprint2_finished_backlog.png)
 
 ## Sprint Retrospective
 
-![Sprint_2_Retrospective](../../resources/images/Sprint2_retrospective.png)
+![Sprint_2_Retrospective](../../resources/images/Sprint2_Retrospective.png)
 
 
 
