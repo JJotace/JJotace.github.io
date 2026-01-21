@@ -1,11 +1,11 @@
 ---
 layout: default
-title: 4.8 Problems
+title: 4.9 Problems
 parent: 4. Implementation
-nav_order: 8
+nav_order: 9
 ---
 
-# 4.8 Problems
+# 4.9 Problems
 
 
 ## Wrong OS selected for Template
@@ -21,6 +21,7 @@ Once the right OS was used, the pings worked without issue.
 Login command example:
 ```
 ssh -i ~/.ssh/aws-key.pem ec2-user@<ip>
+```
 ```
 frost@Hitman:~/SEM02$ ansible all -m ping
 monitoring-server | SUCCESS => {

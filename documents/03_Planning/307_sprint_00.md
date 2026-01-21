@@ -26,9 +26,9 @@ nav_order: 7
 
 ---
 
-### Timeline
+### Timeline!
 
-![Sprint_0_Timeline_Finished](../../resources/images/Sprint0_Fix.png)
+![Sprint_0_Timeline_Finished](../../resources/images/Sprint0_fix.png)
 
 ---
 

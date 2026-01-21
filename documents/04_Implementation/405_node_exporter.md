@@ -7,7 +7,18 @@ nav_order: 5
 
 # 4.5 Node Exporter
 
-## Introduction
+Node Exporter is a Prometheus component in charge of collecting hardware and OS-level metrics from servers.
+
+The Node Exporter gathers different information in the background and updates the metrics. When Prometheus scrapes the endpoint at port 9100, it gets a snapshot of all the current system statistics. Below are some examples of information collected:
+
+- CPU usage and load
+- Memory usage and swap
+- Disk space and I/O statistics
+- Network traffic and connections
+- System uptime and boot time
+
+
+# Playbooks
 
 ## Main task ```roles/node-exporter/tasks/main.yml``` 
 
@@ -82,6 +93,7 @@ Stars the Node Exporter (during the task) and makes it start on boot - differenc
 ```
 
 ## Handler ```roles/node-exporter/handlers/main.yml``` 
+
 Handlers run when notified by a task, whenever the config file changes, it will restart the service.
 
 ```yaml

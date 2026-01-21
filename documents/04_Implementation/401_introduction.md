@@ -23,10 +23,10 @@ The implementation approach addresses a practical challenge: with a limited AWS 
 
 This introduction servers as a quick overview of the planned approach and establishes the foundation for the detailed description of each step in the following sections:
 
-* Setting up the AWS Infrastructure and Ansible environment
-* Deploying Node Exporter to target servers
-* Configuring Prometheus for metrics collection
-* Installing and configuring Grafana dashboards
-* Testing the infrastructure
+* Setting up the **AWS Infrastructure and Ansible environment**
+* Deploying **Node Exporter to target servers**
+* Configuring **Prometheus for metrics collection**
+* Installing and configuring **Grafana dashboards**
+* **Testing** the infrastructure
 
 
