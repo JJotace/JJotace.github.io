@@ -68,9 +68,13 @@ nav_order: 9
 
 * **Private vs Public IP Problem**: Initial Prometheus configuration used public IPs which could not reach Node Exporters. Solved by adding `private_ip` variable to inventory and updating prometheus.yml.j2 template to use private IPs for scraping.
 
+---
+
 ### Backlog
 
 ![Sprint_2_Backlog](../../resources/images/Sprint2_finished_backlog.png)
+
+---
 
 ## Sprint Retrospective
 

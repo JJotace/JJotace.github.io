@@ -66,9 +66,13 @@ nav_order: 8
 * **Time management:** There were no major problems except for a 
 * **Learning Curve**: First time working with Ansible outside of already existing work environment & first time working with Grafana.
 
+---
+
 ### Backlog
 
 ![Sprint_1_Backlog](../../resources/images/Sprint1_finished_Backlog.png)
+
+---
 
 ## Sprint Retrospective
 

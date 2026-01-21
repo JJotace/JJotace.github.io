@@ -49,10 +49,13 @@ nav_order: 10
 
 ### Issues Encountered
 
+---
 
 ### Backlog
 
 ![Sprint_3_Backlog](../../resources/images/Sprint3_finished_backlog.png)
+
+---
 
 ## Sprint Retrospective
 
