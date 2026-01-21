@@ -1,13 +1,14 @@
 ---
 layout: default
-title: 3.7 Sprint 01
+title: 3.8 Sprint 1
 parent: 3. Planning
-nav_order: 7
+nav_order: 8
 ---
 
 # Sprint 1 Review & Retrospective
 
 **Date**: 01.12.2025  
+**Duration**: 1 Month
 **Location**: Microsoft Teams
 
 **Participants**:
@@ -35,8 +36,8 @@ nav_order: 7
 
 * **Jira Setup**: Project structure complete with 4 epics and 13 user stories across all sprints.
 * **AWS Infrastructure Design**: Security groups defined, EC2 specifications documented.
-* **Ansible Configuration**: ansible.cfg and inventory.yml created following best practices. Directory structure established with role placeholders.
-* **Documentation**: Bare bones documentation and layout created.
+* **Ansible Configuration**: ansible.cfg and inventory.yml created following best practices.
+* **Documentation**: Documentation has been updated accordingly.
 * **Questions for Experts**: None.
 
 ---

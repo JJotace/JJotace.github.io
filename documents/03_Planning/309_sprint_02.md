@@ -1,13 +1,14 @@
 ---
 layout: default
-title: 3.8 Sprint 02
+title: 3.9 Sprint 2
 parent: 3. Planning
-nav_order: 8
+nav_order: 9
 ---
 
 # Sprint 2 Review & Retrospective
 
-**Date**: 01.01.2025  
+**Date**: 01.01.2025
+**Duration**: 1 Month
 **Location**: Microsoft Teams
 
 **Participants**:
