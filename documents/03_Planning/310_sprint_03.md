@@ -5,9 +5,9 @@ parent: 3. Planning
 nav_order: 10
 ---
 
-# Sprint 3 Review
+# Sprint 3 Review & Retrospective
 
-**Date**: 28.01.2026
+**Date**: 28.01.2025  
 **Duration**: 1 Month
 **Location**: Microsoft Teams
 
@@ -20,9 +20,9 @@ nav_order: 10
 
 ### Progress Overview
 
-* Documentation: 100%
-* Implementation: 100%
-* Presentation: 100%
+* Documentation: 20%
+* Implementation: 0%
+* Presentation: 0%
 
 ---
 

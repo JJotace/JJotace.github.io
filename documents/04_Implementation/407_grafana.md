@@ -7,7 +7,7 @@ nav_order: 7
 
 # 4.7 Grafana
 
-
+Grafana is the visualization layer of the monitoring stack. It pulls the raw metrics from Prometheus and turns the data into easy to read dashboards and graphs. Grafana is also compatible with many data sources, not just Prometheus.
 
 # Playbooks
 
