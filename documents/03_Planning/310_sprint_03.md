@@ -20,9 +20,9 @@ nav_order: 10
 
 ### Progress Overview
 
-* Documentation: 20%
-* Implementation: 0%
-* Presentation: 0%
+* Documentation: 100%
+* Implementation: 100%
+* Presentation: 100%
 
 ---
 
@@ -34,20 +34,32 @@ nav_order: 10
 
 ### Status of the project
 
+* **Documentation**: Made up for the time lost in previous sprints and completed the documentation succesfully.
+* **Presentation**: The project was presented with animated slides, it counted with a live and pre-recorded demo in case things went wrong.
+* **Final touches**: The project documentation has been proofread and any errors in formatting have been fixed.
+* **Questions for Experts**: A meeting was held with the project SME to oversee the current progress and improve things that were lacking or missing.
 
 ---
 
 ### Comparison to Project Goals
 
+* **Project Goals**: All goals have been achieved, we have a working project and solid documentation.
+* **Sprint 3 Objectives**: All stories completed successfully.
+  - SMD-39: Node Exporter
+  - SMD-40: Prometheus
+  - SMD-41: Grafana & Dashboards
 
 ---
 
 ### To do
 
+* **Nothing**
 
 ---
 
 ### Issues Encountered
+
+* **None**
 
 ---
 
