@@ -1,0 +1,14 @@
+title: Store Database Project
+description: "Store Database Project"
+remote_theme: just-the-docs/just-the-docs
+
+url: https://JJotace.github.io/
+
+# This forces GitHub Pages to use your remote theme
+plugins:
+  - jekyll-remote-theme
+
+aux_links:
+  JIRA Project: https://jjotace.atlassian.net/jira/software/projects/SD/summary
+
+footer_content: "Juan Cardoso - Sem03 - Technische Berufsschule Zürich - Cloud Native Engineering - 2025"
