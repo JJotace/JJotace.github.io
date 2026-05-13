@@ -2,7 +2,7 @@
 layout: default
 title: 3.1 Sprint 0
 parent: 3. Planning
-nav_order: 1
+nav_order: 3
 ---
 
 # Sprint 0 Review
