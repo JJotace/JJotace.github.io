@@ -79,7 +79,7 @@ gantt
 | 2.5 Semantic Search Implementation (pgvector) | 8 | pgvector extension, Python embedding generation and nearest-neighbour query implementation. |
 | 2.6 Python Service | 5 | Minimal Python service connecting to PostgreSQL, calling stored procedures and exposing semantic search. |
 | 2.7 Views | 3 | SQL views: inventory value, top selling cards, low stock, revenue by set and order summary. |
-| 2.8 Simple Search Frontend | 3 | GitHub Pages search interface with semantic and LIKE search toggle. |
+| 2.8 Simple Search Frontend | 3 | Search interface with semantic and LIKE search toggle. |
 | 2.9 Performance Benchmarking (Vector vs LIKE) | 5 | Comparative test queries with measured response times and documented conclusion. |
 | 2.10 Sprint 2 Review | 1 | Sprint review and handover. |
  
