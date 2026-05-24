@@ -12,7 +12,7 @@ nav_order: 2
 
 The project organization is defined as per the following image:
 
-WIP
+![Communication Plan](../../resources/images/communication_plan.png)
 
 ## Project & Student
 
