@@ -10,11 +10,7 @@ nav_order: 2
 
 # Definition of roles
 
-The project organization is defined as per the following image:
-
-![Communication Plan](../../resources/images/communication_plan.drawio.svg)
-
-## Project & Student
+# Project & Student
 
 This project will be planned and executed by the student Juan Cardoso. Juan Cardoso will also serve as both the Scrum Master and Product Owner, following the Scrum Project Management Methodology.
 
@@ -35,3 +31,11 @@ The Business Owner also servers as a middleman between the project team and the 
 The main goal is to maximize the value of the project for the company.
 
 The stakeholders are in this case the school itself.
+
+
+# Communication Plan
+
+The communication will be mostly handled via MS Teams or in person during class.
+Github & GitHub Pages are publicly accessible.
+
+![Communication Plan](../../resources/images/communication_plan.drawio.svg)
