@@ -64,7 +64,7 @@ gantt
 | 1.3 Project Planning & Timeline | 3 | Gantt chart with milestones and story point estimation against the 50h budget. |
 | 1.4 Architecture Design & Tech Stack Decision | 5 | Technology evaluation per component with documented justification for each choice. |
 | 1.5 System Design & Architecture Documentation | 5 | Architecture diagram, data flow description and interface/dependency listing. |
-| 1.6 Database Schema Design (ERD) | 5 | Full relational schema with tables, relationships, constraints, indexes and pgvector column. |
+| 1.6 Database Schema Design (ERD) | 5 | Table definitions, relationships, constraints, indexes, pgvector column placement and 3NF justification. ERD diagram to be generated from implemented schema in Sprint 2. |
 | 1.7 Risk Analysis | 3 | Risk register with probability, impact and mitigation per risk across technical, time and scope dimensions. |
 | 1.8 Sprint 1 Review | 1 | Sprint review and handover. |
  
