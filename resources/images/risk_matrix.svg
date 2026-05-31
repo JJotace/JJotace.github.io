@@ -1,0 +1,107 @@
+<svg width="100%" viewBox="0 0 680 580" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Risk matrix — probability vs impact</title>
+<desc>A 5x5 risk matrix showing 9 project risks plotted by probability (Y axis, 1-5) and impact (X axis, 1-5), colour-coded green, yellow, and red.</desc>
+
+<!-- Row 5: Y Y R R R -->
+<rect x="100" y="40"  width="108" height="96" fill="#f5d657"/>
+<rect x="208" y="40"  width="108" height="96" fill="#f5d657"/>
+<rect x="316" y="40"  width="108" height="96" fill="#e85050"/>
+<rect x="424" y="40"  width="108" height="96" fill="#e85050"/>
+<rect x="532" y="40"  width="108" height="96" fill="#e85050"/>
+<!-- Row 4: Y Y Y R R -->
+<rect x="100" y="136" width="108" height="96" fill="#f5d657"/>
+<rect x="208" y="136" width="108" height="96" fill="#f5d657"/>
+<rect x="316" y="136" width="108" height="96" fill="#f5d657"/>
+<rect x="424" y="136" width="108" height="96" fill="#e85050"/>
+<rect x="532" y="136" width="108" height="96" fill="#e85050"/>
+<!-- Row 3: G Y Y Y R -->
+<rect x="100" y="232" width="108" height="96" fill="#7ec87e"/>
+<rect x="208" y="232" width="108" height="96" fill="#f5d657"/>
+<rect x="316" y="232" width="108" height="96" fill="#f5d657"/>
+<rect x="424" y="232" width="108" height="96" fill="#f5d657"/>
+<rect x="532" y="232" width="108" height="96" fill="#e85050"/>
+<!-- Row 2: G G Y Y Y -->
+<rect x="100" y="328" width="108" height="96" fill="#7ec87e"/>
+<rect x="208" y="328" width="108" height="96" fill="#7ec87e"/>
+<rect x="316" y="328" width="108" height="96" fill="#f5d657"/>
+<rect x="424" y="328" width="108" height="96" fill="#f5d657"/>
+<rect x="532" y="328" width="108" height="96" fill="#f5d657"/>
+<!-- Row 1: G G G Y Y -->
+<rect x="100" y="424" width="108" height="96" fill="#7ec87e"/>
+<rect x="208" y="424" width="108" height="96" fill="#7ec87e"/>
+<rect x="316" y="424" width="108" height="96" fill="#7ec87e"/>
+<rect x="424" y="424" width="108" height="96" fill="#f5d657"/>
+<rect x="532" y="424" width="108" height="96" fill="#f5d657"/>
+
+<!-- Grid lines -->
+<rect x="100" y="40" width="540" height="480" fill="none" stroke="#aaa" stroke-width="0.5"/>
+<line x1="208" y1="40" x2="208" y2="520" stroke="#aaa" stroke-width="0.5"/>
+<line x1="316" y1="40" x2="316" y2="520" stroke="#aaa" stroke-width="0.5"/>
+<line x1="424" y1="40" x2="424" y2="520" stroke="#aaa" stroke-width="0.5"/>
+<line x1="532" y1="40" x2="532" y2="520" stroke="#aaa" stroke-width="0.5"/>
+<line x1="100" y1="136" x2="640" y2="136" stroke="#aaa" stroke-width="0.5"/>
+<line x1="100" y1="232" x2="640" y2="232" stroke="#aaa" stroke-width="0.5"/>
+<line x1="100" y1="328" x2="640" y2="328" stroke="#aaa" stroke-width="0.5"/>
+<line x1="100" y1="424" x2="640" y2="424" stroke="#aaa" stroke-width="0.5"/>
+
+<!-- Y axis labels -->
+<text x="88" y="93"  text-anchor="end" font-size="12" font-family="sans-serif" fill="#555">5</text>
+<text x="88" y="189" text-anchor="end" font-size="12" font-family="sans-serif" fill="#555">4</text>
+<text x="88" y="285" text-anchor="end" font-size="12" font-family="sans-serif" fill="#555">3</text>
+<text x="88" y="381" text-anchor="end" font-size="12" font-family="sans-serif" fill="#555">2</text>
+<text x="88" y="477" text-anchor="end" font-size="12" font-family="sans-serif" fill="#555">1</text>
+
+<!-- X axis labels -->
+<text x="154" y="540" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555">1</text>
+<text x="262" y="540" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555">2</text>
+<text x="370" y="540" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555">3</text>
+<text x="478" y="540" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555">4</text>
+<text x="586" y="540" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555">5</text>
+
+<!-- Axis titles -->
+<text x="40" y="280" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555" transform="rotate(-90 40 280)">Probability</text>
+<text x="370" y="568" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#555">Impact</text>
+
+<!-- Direction labels -->
+<text x="88" y="50"  text-anchor="end" font-size="12" font-family="sans-serif" fill="#888">high</text>
+<text x="88" y="518" text-anchor="end" font-size="12" font-family="sans-serif" fill="#888">low</text>
+<text x="108" y="538" text-anchor="start" font-size="12" font-family="sans-serif" fill="#888">low</text>
+<text x="632" y="538" text-anchor="end" font-size="12" font-family="sans-serif" fill="#888">high</text>
+
+<!-- R1: prob=4, impact=5 -->
+<circle cx="586" cy="184" r="22" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="586" y="190" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">1</text>
+
+<!-- R2: prob=3, impact=4 -->
+<circle cx="478" cy="280" r="22" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="478" y="286" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">2</text>
+
+<!-- R3: prob=3, impact=3 top-left -->
+<circle cx="348" cy="263" r="18" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="348" y="269" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">3</text>
+
+<!-- R7: prob=3, impact=3 top-right -->
+<circle cx="392" cy="263" r="18" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="392" y="269" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">7</text>
+
+<!-- R5: prob=3, impact=3 bottom-center -->
+<circle cx="370" cy="299" r="18" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="370" y="305" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">5</text>
+
+<!-- R4: prob=2, impact=5 left -->
+<circle cx="565" cy="376" r="20" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="565" y="382" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">4</text>
+
+<!-- R9: prob=2, impact=5 right -->
+<circle cx="607" cy="376" r="20" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="607" y="382" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">9</text>
+
+<!-- R6: prob=2, impact=3 -->
+<circle cx="370" cy="376" r="20" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="370" y="382" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">6</text>
+
+<!-- R8: prob=3, impact=2 -->
+<circle cx="262" cy="280" r="22" fill="white" stroke="#666" stroke-width="1.5"/>
+<text x="262" y="286" text-anchor="middle" font-size="14" font-weight="500" font-family="sans-serif" fill="#333">8</text>
+
+</svg>

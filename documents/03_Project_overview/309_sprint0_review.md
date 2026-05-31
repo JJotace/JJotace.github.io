@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 3.6 Sprint 0
-parent: 3. Planning
+parent: 3. Project Overview
 nav_order: 6
 ---
 
@@ -26,7 +26,7 @@ nav_order: 6
 
 ---
 
-### Timeline!
+### Timeline
 
 ![Sprint_0_Timeline](../../resources/images/Sprint0_timeline.png)
 
