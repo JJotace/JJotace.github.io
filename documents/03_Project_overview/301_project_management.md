@@ -85,10 +85,56 @@ User stories are prioritised using MoSCoW (**M**ust have, **S**hould have, **C**
 | Could have | Redis caching, Pokémon TCG API price sync |
 | Won't have | Authentication, production deployment, multi-tenant support |
 
+---
+
+## Definition of Done
+
+### Functionality and Implementation
+
+- Every story **acceptance criteria** has been completed.
+- The function has been **fully implemented**, tested and is ready to be deployed.
+- The product works **without errors** and is stable.
+
+### Documentation
+
+- The technical implementation is documented in **GitHub** (via screenshots, diagrams, markdown, etc.)
+- The **result and steps** leading up to are **described** (configuration files, logic and tools)
+- All project files can be found in the respective pre-established **GitHub structure**
+
+### Quality Control
+
+- The product has been **tested manually** (End-to-End or with test cases).
+- All relevant **test results** have been documented.
+- The solution has been **self-reviewed** or (when possible) 4-eye checked.
+
+---
+
+## Functional Requirements
+
+| ID | Requirement |
+|---|---|
+| FR-01 | Store Pokémon card data (name, rarity, set) with bulk CSV import |
+| FR-02 | Track inventory per card with condition, quantity, and price |
+| FR-03 | Log price changes automatically when inventory price is updated |
+| FR-04 | Process a purchase as a single atomic transaction: stock check → deduct inventory → create order, items, payment, and delivery → ROLLBACK on any failure |
+| FR-05 | Cancel an order and restore inventory to its previous state |
+| FR-06 | Restock inventory — add quantity to an existing card/condition entry or create a new one if it does not exist |
+| FR-07 | Apply price updates to multiple inventory entries in a single operation |
+| FR-08 | Search cards by semantic meaning via a minimal HTTP endpoint using vector embeddings |
+
+## Non-Functional Requirements
+
+| ID | Requirement |
+|---|---|
+| NFR-01 | The full stack starts with a single `docker compose up` — no manual configuration steps |
+| NFR-02 | All purchase operations must be fully transactional — partial state must never be committed on failure |
+| NFR-03 | Business logic is enforced at the database level, not in application code |
 
 ---
 
 ## Release Planning
+
+Each sprint is assigned one of the following releases: MVP, MLP, or MMPa
 
 | Sprint | Release | Description | Value delivered |
 |---|---|---|---|
@@ -115,8 +161,6 @@ User stories are prioritised using MoSCoW (**M**ust have, **S**hould have, **C**
 ![Risk Matrix](../../resources/images/risk_matrix.svg)
 
 ---
-
-## SWOT Matrix
 
 ## SWOT Matrix
 
