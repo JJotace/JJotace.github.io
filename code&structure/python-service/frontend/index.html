@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart DB — Pokémon Card Shop</title>
+</head>
+<body>
+  <h1>Smart DB Search</h1>
+  <input id="q" type="text" placeholder="Search cards..." />
+  <button onclick="search()">Search</button>
+  <pre id="results"></pre>
+  <script>
+    async function search() {
+      const q = document.getElementById('q').value;
+      const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>

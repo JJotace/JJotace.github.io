@@ -30,6 +30,10 @@ Burndown Chart
 
 
 
+## 2.1 Docker Compose Setup
+
+
+
 ## Sprint Review
 
 *To be completed at end of Sprint 2.*
