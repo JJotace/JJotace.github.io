@@ -132,7 +132,85 @@ The PostgreSQL container mounts an `init.sql` volume that creates the schema, tr
 
 ### ERD
 
-*The ERD will be added here once the schema is implemented in Sprint 2, generated from the live database using DBeaver.*
+```mermaid
+erDiagram
+  sets ||--o{ cards : "has"
+  cards ||--o{ inventory : "stocked in"
+  cards ||--o{ order_items : "ordered as"
+  inventory ||--o{ price_history : "logs"
+  customers ||--o{ orders : "places"
+  orders ||--o{ order_items : "contains"
+  orders ||--|| deliveries : "shipped via"
+  orders ||--|| payments : "paid by"
+
+  sets {
+    int id PK
+    varchar name
+    date release_date
+  }
+  cards {
+    int id PK
+    varchar name
+    varchar number
+    varchar rarity
+    int set_id FK
+    vector vector
+  }
+  customers {
+    int id PK
+    varchar name
+    varchar email
+    text address
+    text shipping_address
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  inventory {
+    int id PK
+    int card_id FK
+    enum condition
+    int quantity
+    numeric price
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  price_history {
+    int id PK
+    int inventory_id FK
+    numeric old_price
+    numeric new_price
+    timestamptz changed_at
+  }
+  orders {
+    int id PK
+    int customer_id FK
+    enum status
+    numeric total
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  order_items {
+    int id PK
+    int order_id FK
+    int card_id FK
+    int quantity
+    numeric unit_price
+  }
+  deliveries {
+    int id PK
+    int order_id FK
+    text address
+    enum status
+    date estimated_date
+  }
+  payments {
+    int id PK
+    int order_id FK
+    numeric amount
+    enum method
+    enum status
+  }
+```
 
 ### Table Definitions
 
