@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 4.2 Sprint 2 — Realization
-parent: 4. Implementation
+parent: 4. Sprint Overview
 nav_order: 2
 ---
 

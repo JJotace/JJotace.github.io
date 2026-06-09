@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 4.1 Sprint 1 — Planning
-parent: 4. Implementation
+parent: 4. Sprint Overview
 nav_order: 1
 ---
 

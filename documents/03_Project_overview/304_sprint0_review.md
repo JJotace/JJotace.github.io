@@ -1,8 +1,8 @@
 ---
 layout: default
-title: 3.6 Sprint 0
+title: 3.4 Sprint 0
 parent: 3. Project Overview
-nav_order: 6
+nav_order: 4
 ---
 
 # Sprint 0 Review
