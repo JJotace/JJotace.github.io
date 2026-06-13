@@ -134,82 +134,89 @@ The PostgreSQL container mounts an `init.sql` volume that creates the schema, tr
 
 ```mermaid
 erDiagram
-  sets ||--o{ cards : "has"
-  cards ||--o{ inventory : "stocked in"
-  cards ||--o{ order_items : "ordered as"
-  inventory ||--o{ price_history : "logs"
-  customers ||--o{ orders : "places"
-  orders ||--o{ order_items : "contains"
-  orders ||--|| deliveries : "shipped via"
-  orders ||--|| payments : "paid by"
+    sets {
+        int id PK
+        varchar name
+        date release_date
+    }
 
-  sets {
-    int id PK
-    varchar name
-    date release_date
-  }
-  cards {
-    int id PK
-    varchar name
-    varchar number
-    varchar rarity
-    int set_id FK
-    vector vector
-  }
-  customers {
-    int id PK
-    varchar name
-    varchar email
-    text address
-    text shipping_address
-    timestamptz created_at
-    timestamptz updated_at
-  }
-  inventory {
-    int id PK
-    int card_id FK
-    enum condition
-    int quantity
-    numeric price
-    timestamptz created_at
-    timestamptz updated_at
-  }
-  price_history {
-    int id PK
-    int inventory_id FK
-    numeric old_price
-    numeric new_price
-    timestamptz changed_at
-  }
-  orders {
-    int id PK
-    int customer_id FK
-    enum status
-    numeric total
-    timestamptz created_at
-    timestamptz updated_at
-  }
-  order_items {
-    int id PK
-    int order_id FK
-    int card_id FK
-    int quantity
-    numeric unit_price
-  }
-  deliveries {
-    int id PK
-    int order_id FK
-    text address
-    enum status
-    date estimated_date
-  }
-  payments {
-    int id PK
-    int order_id FK
-    numeric amount
-    enum method
-    enum status
-  }
+    cards {
+        int id PK
+        varchar name
+        varchar number
+        varchar rarity
+        int set_id FK
+        vector vector
+    }
+
+    customers {
+        int id PK
+        varchar name
+        varchar email
+        text address
+        text shipping_address
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    inventory {
+        int id PK
+        int card_id FK
+        card_condition condition
+        int quantity
+        numeric price
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    price_history {
+        int id PK
+        int inventory_id FK
+        numeric old_price
+        numeric new_price
+        timestamptz changed_at
+    }
+
+    orders {
+        int id PK
+        int customer_id FK
+        order_status status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    order_items {
+        int id PK
+        int order_id FK
+        int card_id FK
+        int quantity
+        numeric unit_price
+    }
+
+    deliveries {
+        int id PK
+        int order_id FK
+        text address
+        delivery_status status
+        date estimated_date
+    }
+
+    payments {
+        int id PK
+        int order_id FK
+        numeric amount
+        payment_method method
+        payment_status status
+    }
+
+    sets ||--o{ cards : "contains"
+    cards ||--o{ inventory : "stocked as"
+    cards ||--o{ order_items : "sold as"
+    inventory ||--o{ price_history : "logs"
+    customers ||--o{ orders : "places"
+    orders ||--o{ order_items : "contains"
+    orders ||--|| deliveries : "fulfilled by"
+    orders ||--|| payments : "paid by"
 ```
 
 ### Table Definitions
@@ -277,7 +284,6 @@ Index: `card_id`
 | id | SERIAL | PRIMARY KEY |
 | customer_id | INTEGER | FOREIGN KEY → customers(id) |
 | status | order_status | ENUM: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED |
-| total | NUMERIC | |
 | created_at | TIMESTAMP | DEFAULT NOW() |
 | updated_at | TIMESTAMP | DEFAULT NOW() |
 
@@ -319,15 +325,18 @@ Index: `order_id`
 
 ## Normalisation (3NF)
 
+**3NF rule:** Every non-key column must depend only on the primary key — not on another non-key column.
+
 **1NF:** All columns contain single atomic values. No repeating groups. Each table has a single-column primary key.
 
-**2NF:** Every non-key column depends on the full primary key. With single-column keys, partial dependencies are not possible by definition.
+**2NF:** With single-column keys, partial dependencies are not possible by definition.
 
-**3NF:** No non-key column depends on another non-key column. Three cases worth noting:
+**3NF:** Two cases worth noting:
 
-- `orders.total` can be calculated from order items but is stored directly for query performance. The stored procedure that creates orders sets this value and keeps it consistent.
 - `customers.shipping_address` is independent of `customers.address` — billing and shipping are not functionally related.
 - `order_items.unit_price` stores the price at the time of purchase rather than referencing the current inventory price. This ensures historical orders remain accurate after price changes.
+
+Full table-by-table analysis is in [2.4 3NF Schema Documentation](../04_Sprint_overview/402_sprint2.md#24-3nf-schema-documentation).
 
 ---
 

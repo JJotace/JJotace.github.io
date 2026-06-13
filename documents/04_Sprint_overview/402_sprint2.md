@@ -34,8 +34,8 @@ Burndown Chart
 
 
 
+## 2.2 PostgresSQL Schema Implementation
 
-## 2.2 
 
 
 ## Story 2.3 — Database Abstractions: Triggers, Stored Procedures, Functions
@@ -69,7 +69,7 @@ The following abstractions were implemented. Each is categorised as either a **T
  
 **Mechanism:** `AFTER UPDATE` trigger on `inventory`, scoped to the `price` column. A `WHEN` guard (`OLD.price IS DISTINCT FROM NEW.price`) ensures the trigger only fires on actual price changes, not on unrelated row updates.
  
-**Why a trigger and not a stored procedure:** The requirement is passive — it must fire on every price change regardless of what caused it. A trigger cannot be bypassed. A stored procedure would have to be called explicitly and could be skipped.
+**Why a trigger:** Must fire on every price change regardless of what caused it — a trigger cannot be bypassed by application code.
  
 ```sql
 CREATE OR REPLACE FUNCTION fn_log_price_change()
@@ -96,7 +96,7 @@ EXECUTE FUNCTION fn_log_price_change();
  
 **Mechanism:** `AFTER UPDATE` trigger on `payments`, scoped to the `status` column. The function checks for the specific `pending → completed` transition before acting, so re-confirming an already-completed payment has no effect.
  
-**Why a trigger:** State consistency between two related tables is exactly the use case for a trigger. The order status is a derived consequence of the payment status — enforcing this at the DB level guarantees consistency.
+**Why a trigger:** Order status must reflect payment status automatically — a trigger guarantees this regardless of which code path updates the payment.
  
 ```sql
 CREATE OR REPLACE FUNCTION fn_sync_order_on_payment()
@@ -127,7 +127,7 @@ EXECUTE FUNCTION fn_sync_order_on_payment();
  
 **Mechanism:** `BEFORE UPDATE` trigger on `inventory`, `orders`, and `customers`. A single shared function `fn_set_updated_at` is registered on all three tables. Uses `clock_timestamp()` rather than `NOW()` — `NOW()` returns transaction start time and does not advance within a transaction, which caused test failures during development.
  
-**Why a trigger:** This is a cross-cutting concern. A trigger guarantees the field is always accurate regardless of which code path performs the update.
+**Why a trigger:** Must fire on every update to all three tables — a trigger guarantees this without relying on application code.
  
 ```sql
 CREATE OR REPLACE FUNCTION fn_set_updated_at()
@@ -161,7 +161,7 @@ EXECUTE FUNCTION fn_set_updated_at();
  
 **Mechanism:** Stored procedure with full transaction control. Stock is checked and locked with `SELECT FOR UPDATE` before deduction. This prevents a race condition where two concurrent purchases could both read the same available quantity and both succeed when only enough stock exists for one.
  
-**Why a stored procedure and not a trigger:** This is an explicit, multi-step operation initiated by the application. A trigger cannot span multiple tables in this way. The SP also returns the created `order_id` as an OUT parameter so the caller can reference the new order.
+**Why a stored procedure:** Multi-step operation spanning six tables, called explicitly by the application. Returns the created `order_id` to the caller via an OUT parameter.
  
 **Key design decision:** `unit_price` in `order_items` is a snapshot of the price at time of purchase. If `inventory.price` changes later, historical orders retain the original price.
  
@@ -178,7 +178,6 @@ DECLARE
     v_available   INT;
     v_price       NUMERIC(10, 2);
     v_card_id     INT;
-    v_total       NUMERIC(10, 2);
     v_ship_addr   TEXT;
 BEGIN
     SELECT quantity, price, card_id
@@ -202,19 +201,17 @@ BEGIN
         RAISE EXCEPTION 'Customer % does not exist', p_customer_id;
     END IF;
  
-    v_total := v_price * p_quantity;
- 
     UPDATE inventory SET quantity = quantity - p_quantity WHERE id = p_inventory_id;
  
-    INSERT INTO orders (customer_id, status, total)
-    VALUES (p_customer_id, 'pending', v_total)
+    INSERT INTO orders (customer_id, status)
+    VALUES (p_customer_id, 'pending')
     RETURNING id INTO p_order_id;
  
     INSERT INTO order_items (order_id, card_id, quantity, unit_price)
     VALUES (p_order_id, v_card_id, p_quantity, v_price);
  
     INSERT INTO payments (order_id, amount, method, status)
-    VALUES (p_order_id, v_total, p_payment_method, 'pending');
+    VALUES (p_order_id, v_price * p_quantity, p_payment_method, 'pending');
  
     INSERT INTO deliveries (order_id, address, status, estimated_date)
     VALUES (p_order_id, COALESCE(v_ship_addr, ''), 'pending', CURRENT_DATE + INTERVAL '5 days');
@@ -233,6 +230,8 @@ $$;
  
 **Mechanism:** Stored procedure. Guards against invalid cancellations (shipped or delivered orders cannot be cancelled through this path — that requires a returns flow). Restores inventory per order item.
  
+**Why a stored procedure:** Cancellation is an explicit action with conditional logic — it must be called intentionally, not fire automatically on every status change.
+
 **Known limitation:** The inventory restore targets the first matching `card_id` row rather than the exact original `card_id + condition` combination. If the original inventory entry was deleted after the purchase, stock is still restored but to a different condition entry. This is acceptable for a shop prototype but would require tracking `inventory_id` in `order_items` in a production system.
  
 ```sql
@@ -281,6 +280,8 @@ $$;
  
 **Mechanism:** Stored procedure. Checks for an existing entry first. The `p_update_price` parameter controls whether the price is overwritten — a routine restock does not change the price unless explicitly requested.
  
+**Why a stored procedure:** Restock requires conditional logic (insert vs. update) that belongs in the database, not the application layer.
+
 **Interaction with Trigger 1:** When `p_update_price = TRUE`, the price update on the existing row fires `trg_log_price_change` automatically. No additional code needed.
  
 ```sql
@@ -325,6 +326,8 @@ $$;
  
 **Mechanism:** Stored procedure accepting an array of `price_update_input` composite type `(inventory_id, new_price)`. Iterates and updates each entry. The `IS DISTINCT FROM` guard in `trg_log_price_change` means only actual price changes are logged — passing the same price as before produces no `price_history` row.
  
+**Why a stored procedure:** Batch update called explicitly by the application — validation and audit logging are enforced in one place.
+
 ```sql
 CREATE TYPE price_update_input AS (
     inventory_id INT,
@@ -514,41 +517,11 @@ Test data is isolated using a dedicated card (`id=9999`, name `Testmon`) and a t
  
 ### Reflection
  
-PL/pgSQL was new going into this story. Three issues came up during testing that required changes to both the implementation and the tests.
+PL/pgSQL was new going into this story. One issue came up during testing that required a change to the trigger implementation.
  
 ---
  
-#### Problem 1 — TEST 2 failed: `price_history` row not found
- 
-**Failure output:**
-```
-WARNING:  TEST 2 FAILED: expected 1 price_history row, found 0
-```
- 
-**Cause:** The test hardcoded `old_price = 49.99` in the assertion. The actual seed price for inventory `id=1` was `9.12`, so the trigger fired and logged the change correctly — the assertion just never matched.
- 
-**Fix:** Read the actual price into a variable before the update and use that in the assertion instead of a hardcoded value.
- 
----
- 
-#### Problem 2 — TEST 8 failed: `restock_inventory` assertion wrong
- 
-**Failure output (first run):**
-```
-WARNING:  TEST 8 FAILED: qty=10, rows=1
-```
-**Failure output (second run):**
-```
-WARNING:  TEST 8 FAILED: qty=5, rows=1
-```
- 
-**Cause:** The test setup inserted an inventory row with `id=1` using `ON CONFLICT DO NOTHING`. Since `id=1` was already taken by real seed data, the insert was silently skipped. The test then looked up quantity for `inventory WHERE id = 1`, which pointed to a real card — not the test card. `v_qty_before` was NULL, and `NULL + 5` is NULL in SQL, so the assertion `v_qty_after = v_qty_before + 5` always failed.
- 
-**Fix:** Removed the hardcoded `id=1` from the inventory seed insert and captured the test card's inventory id at runtime into a `TEMP TABLE test_ctx`. All test blocks then resolve the id from `test_ctx` into a local variable before using it.
- 
----
- 
-#### Problem 3 — `NOW()` does not advance within a transaction
+#### Problem — `NOW()` does not advance within a transaction
  
 **Failure output:**
 ```
@@ -569,33 +542,6 @@ NEW.updated_at = clock_timestamp();
  
 ---
  
-#### Problem 4 — Subqueries not allowed as CALL arguments
- 
-**Failure output:**
-```
-ERROR:  cannot use subquery in CALL argument
-LINE 3:         p_inventory_id   => (SELECT inv_id FROM test_ctx),
-```
- 
-**Cause:** PL/pgSQL does not allow subqueries directly inside CALL argument lists. This affected both `process_purchase` and `bulk_price_update` calls in the test file.
- 
-**Fix:** Resolved all subqueries into local variables before the CALL statement.
- 
-```sql
--- Before (broken)
-CALL process_purchase(
-    p_inventory_id => (SELECT inv_id FROM test_ctx), ...
-);
- 
--- After (fixed)
-SELECT inv_id INTO v_inv_id FROM test_ctx;
-CALL process_purchase(
-    p_inventory_id => v_inv_id, ...
-);
-```
- 
----
- 
 #### Design limitation — `cancel_order` inventory restore
  
 `cancel_order` restores stock to the first matching inventory entry for that card, not necessarily the exact one originally purchased. This happens because `order_items` does not store `inventory_id`. A known limitation — fixing it mid-sprint would have required a schema change.
@@ -607,6 +553,286 @@ CALL process_purchase(
 When two purchases happen at the exact same time, both read the database simultaneously. Without the lock, both see `quantity = 1`, both think there's enough stock, and both go through — ending at `quantity = -1`.
  
 `SELECT FOR UPDATE` makes the second purchase wait until the first one is done. By then the quantity is already 0, so it gets rejected cleanly.
+
+---
+
+## 2.4 3NF Schema Documentation
+
+**Points:** 3 | **Status:** Complete
+
+### Goal
+
+Demonstrate that the Smart DB schema satisfies Third Normal Form (3NF) by documenting functional dependencies per table and justifying any design decisions that affect normalisation.
+
+---
+
+### Normalisation recap
+
+**3NF rule:** Every non-key column must depend only on the primary key — not on another non-key column.
+
+**2NF** is automatically satisfied because all tables use a single `id` as primary key. There are no composite keys, so no partial dependencies can exist.
+
+---
+
+### Table-by-table analysis
+
+#### `sets`
+
+| Column | Depends on |
+|---|---|
+| name | id |
+| release_date | id |
+
+**3NF satisfied.**
+
+---
+
+#### `cards`
+
+| Column | Depends on |
+|---|---|
+| name | id |
+| number | id |
+| rarity | id |
+| set_id | id |
+| vector | id |
+
+`set_id` is a foreign key reference, not a transitive dependency. `vector` is an embedding generated from name and rarity at insert time; once stored it depends on `id` and does not create a dependency between other columns. **3NF satisfied.**
+
+---
+
+#### `customers`
+
+| Column | Depends on |
+|---|---|
+| name | id |
+| email | id |
+| address | id |
+| shipping_address | id |
+| created_at | id |
+| updated_at | id |
+
+`address` and `shipping_address` are independent columns, both describing the customer directly. Neither depends on the other. **3NF satisfied.**
+
+---
+
+#### `inventory`
+
+| Column | Depends on |
+|---|---|
+| card_id | id |
+| condition | id |
+| quantity | id |
+| price | id |
+| created_at | id |
+| updated_at | id |
+
+`price` is set per inventory entry and does not depend on `condition`. `quantity` does not depend on `price`. **3NF satisfied.**
+
+---
+
+#### `price_history`
+
+| Column | Depends on |
+|---|---|
+| inventory_id | id |
+| old_price | id |
+| new_price | id |
+| changed_at | id |
+
+Point-in-time snapshot. `old_price` and `new_price` are recorded at the moment of change; neither is derived from the other. **3NF satisfied.**
+
+---
+
+#### `orders`
+
+| Column | Depends on |
+|---|---|
+| customer_id | id |
+| status | id |
+| created_at | id |
+| updated_at | id |
+
+No derived or calculated columns. A `total` column was considered during design but removed because it could be derived by summing `order_items.quantity * unit_price`, which would violate 3NF. Order total is computed from `order_items` via the `order_summary` view. **3NF satisfied.**
+
+---
+
+#### `order_items`
+
+| Column | Depends on |
+|---|---|
+| order_id | id |
+| card_id | id |
+| quantity | id |
+| unit_price | id |
+
+`unit_price` is a price snapshot at time of purchase, not a reference to `inventory.price`. This is intentional: inventory prices change over time, but the price a customer paid must not change retroactively. It depends directly on the row, not transitively on any other column. **3NF satisfied.**
+
+---
+
+#### `deliveries`
+
+| Column | Depends on |
+|---|---|
+| order_id | id |
+| address | id |
+| status | id |
+| estimated_date | id |
+
+`address` is a snapshot of `customers.shipping_address` copied at order time. It is stored on the delivery row so that later changes to the customer profile do not affect historical records. **3NF satisfied.**
+
+---
+
+#### `payments`
+
+| Column | Depends on |
+|---|---|
+| order_id | id |
+| amount | id |
+| method | id |
+| status | id |
+
+`amount` does not depend on `method`. `status` does not depend on `amount`. **3NF satisfied.**
+
+---
+
+### Summary
+
+| Table | 3NF | Notes |
+|---|---|---|
+| sets | ✓ | — |
+| cards | ✓ | vector stored at insert, not a transitive dependency |
+| customers | ✓ | — |
+| inventory | ✓ | — |
+| price_history | ✓ | snapshot table by design |
+| orders | ✓ | total removed; computed via order_summary view |
+| order_items | ✓ | unit_price is a snapshot, not a derived value |
+| deliveries | ✓ | address is a snapshot, not a reference |
+| payments | ✓ | — |
+
+All tables satisfy 3NF.
+
+---
+
+## 2.5 Semantic Search Implementation (pgvector)
+
+**Points:** 8 | **Status:** Complete
+
+### Goal
+
+Implement semantic search over the card catalogue using pgvector, so that users can find cards by approximate or misspelled names — something LIKE search cannot handle. Compare both approaches with real query results.
+
+---
+
+### How it works
+
+Each card is represented as a text string combining its name, rarity, and set name:
+
+```
+"Mega Charizard X ex Ultra Rare Phantasmal Flames"
+```
+
+This string is converted to a 384-dimension vector using the `all-MiniLM-L6-v2` model from `sentence-transformers`. The vector is stored in `cards.vector`. At search time, the query is embedded using the same model and pgvector finds the nearest neighbours by L2 distance.
+
+**Why this text combination:** name and rarity are the attributes a user would search by. Set name adds context that helps distinguish cards with the same name across sets. No manual description is needed — the data already has everything required.
+
+**Model choice — `all-MiniLM-L6-v2`:** Produces 384-dimension vectors, matching the `VECTOR(384)` column in the schema. Lightweight, loads in seconds, and runs fully locally inside Docker with no external API calls. A larger model like `all-mpnet-base-v2` produces 768-dimension vectors and would be more accurate, but requires a schema change, uses more memory, and is slower at query time. For 242 short card name strings the accuracy difference is not meaningful.
+
+---
+
+### Implementation
+
+**Embedding generation — `import_cards.py`**
+
+Reads `sets.csv` and `cards.csv`, generates one embedding per card, and inserts all records with their vectors in a single pass. Run once after `docker compose up`:
+
+```bash
+docker exec smart_db_service python import_cards.py
+```
+
+**Vector search — `/search`**
+
+```python
+embedding = MODEL.encode(query).tolist()
+cur.execute("""
+    SELECT c.id, c.name, c.rarity, s.name AS set_name,
+           c.vector <-> %s::vector AS distance
+    FROM cards c
+    JOIN sets s ON c.set_id = s.id
+    ORDER BY distance
+    LIMIT 10
+""", (embedding,))
+```
+
+The `<->` operator is pgvector's L2 distance. Lower distance = more similar.
+
+**LIKE search — `/search/like`**
+
+```sql
+WHERE c.name ILIKE %s OR c.rarity ILIKE %s OR s.name ILIKE %s
+```
+
+Case-insensitive substring match across name, rarity, and set name. Fast, but requires the exact characters to be present.
+
+---
+
+### Comparison: vector search vs LIKE
+
+Test query: `charizard` (clean) and `charirzard` (typo — extra `r`).
+
+#### Clean query — `charizard`
+
+**Vector search (`/search?q=charizard`)**
+
+| # | Name | Rarity | Set | Distance |
+|---|---|---|---|---|
+| 1 | Mega Charizard Y ex | Mega Hyper Rare | Ascended Heroes | 0.9802 |
+| 2 | Mega Charizard X ex | Mega Hyper Rare | Phantasmal Flames | 0.9965 |
+| 3 | Mega Charizard X ex | Ultra Rare | Phantasmal Flames | 1.0112 |
+| 4 | Mega Charizard X ex | Special Illustration Rare | Phantasmal Flames | 1.0383 |
+| 5 | Mega Dragonite ex | Mega Hyper Rare | Ascended Heroes | 1.1437 |
+
+**LIKE search (`/search/like?q=charizard`)**
+
+| # | Name | Rarity | Set |
+|---|---|---|---|
+| 1 | Mega Charizard X ex | Ultra Rare | Phantasmal Flames |
+| 2 | Mega Charizard X ex | Special Illustration Rare | Phantasmal Flames |
+| 3 | Mega Charizard X ex | Mega Hyper Rare | Phantasmal Flames |
+| 4 | Mega Charizard Y ex | Mega Hyper Rare | Ascended Heroes |
+
+Both return the 4 Charizard cards. LIKE returns exactly those 4. Vector returns the same 4 plus 6 loosely related cards ranked by distance.
+
+---
+
+#### Typo query — `charirzard`
+
+**Vector search (`/search?q=charirzard`)**
+
+| # | Name | Rarity | Set | Distance |
+|---|---|---|---|---|
+| 1 | Mega Charizard Y ex | Mega Hyper Rare | Ascended Heroes | 1.1110 |
+| 2 | Mega Charizard X ex | Mega Hyper Rare | Phantasmal Flames | 1.1445 |
+| 3 | Mega Charizard X ex | Ultra Rare | Phantasmal Flames | 1.1451 |
+| 4 | Psyduck | Illustration Rare | Ascended Heroes | 1.1577 |
+| 5 | Mega Charizard X ex | Special Illustration Rare | Phantasmal Flames | 1.1581 |
+
+**LIKE search (`/search/like?q=charirzard`)** — no results.
+
+Vector search still surfaces all 3 Charizard X ex variants and Mega Charizard Y ex within the top 5 results despite the typo. LIKE returns nothing.
+
+---
+
+### Results summary
+
+| | Clean query | Typo query |
+|---|---|---|
+| Vector search | ✓ Correct results, distances 0.98–1.04 | ✓ Charizards in top 5, distances 1.11–1.16 |
+| LIKE search | ✓ Exact matches only | ✗ No results |
+
+**Conclusion:** For clean queries both approaches return the same relevant cards. The difference is typo tolerance — LIKE fails completely on `charirzard`, vector search recovers the correct cards. The trade-off is precision: vector search always returns 10 results ranked by distance, including noise, while LIKE returns only exact matches with no ranking. For a card shop where users may mistype names, vector search provides meaningful resilience that LIKE cannot.
+
+The distances on the typo query (1.11–1.18) are noticeably higher than the clean query (0.98–1.04), showing the model's reduced confidence — the results are correct but the signal is weaker.
 
 ---
 

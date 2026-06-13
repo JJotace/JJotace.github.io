@@ -3,6 +3,7 @@ import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import psycopg2
+from sentence_transformers import SentenceTransformer
 
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
@@ -11,6 +12,10 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER", "smart_user"),
     "password": os.getenv("DB_PASS", "smart_pass"),
 }
+
+print("Loading embedding model...")
+MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+print("Model ready.")
 
 
 def get_connection():
@@ -64,9 +69,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"error": "Missing query parameter 'q'"}, 400)
                 return
             try:
-                from sentence_transformers import SentenceTransformer
-                model = SentenceTransformer("all-MiniLM-L6-v2")
-                embedding = model.encode(query).tolist()
+                embedding = MODEL.encode(query).tolist()
                 conn = get_connection()
                 cur = conn.cursor()
                 cur.execute(
@@ -85,6 +88,38 @@ class Handler(BaseHTTPRequestHandler):
                 conn.close()
                 results = [
                     {"id": r[0], "name": r[1], "rarity": r[2], "set": r[3], "distance": round(r[4], 4)}
+                    for r in rows
+                ]
+                self.send_json({"query": query, "results": results})
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
+
+        elif path == "/search/like":
+            params = parse_qs(parsed.query)
+            query = params.get("q", [""])[0].strip()
+            if not query:
+                self.send_json({"error": "Missing query parameter 'q'"}, 400)
+                return
+            try:
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    SELECT c.id, c.name, c.rarity, s.name AS set_name
+                    FROM cards c
+                    JOIN sets s ON c.set_id = s.id
+                    WHERE c.name ILIKE %s
+                       OR c.rarity ILIKE %s
+                       OR s.name ILIKE %s
+                    LIMIT 10
+                    """,
+                    (f"%{query}%", f"%{query}%", f"%{query}%"),
+                )
+                rows = cur.fetchall()
+                cur.close()
+                conn.close()
+                results = [
+                    {"id": r[0], "name": r[1], "rarity": r[2], "set": r[3]}
                     for r in rows
                 ]
                 self.send_json({"query": query, "results": results})
