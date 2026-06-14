@@ -74,10 +74,15 @@ class Handler(BaseHTTPRequestHandler):
                 cur = conn.cursor()
                 cur.execute(
                     """
-                    SELECT c.id, c.name, c.rarity, s.name AS set_name,
-                           c.vector <-> %s::vector AS distance
+                    SELECT c.id, c.name, c.number, c.rarity, s.name AS set_name,
+                           c.vector <-> %s::vector AS distance,
+                           MIN(i.price) AS min_price,
+                           COALESCE(SUM(i.quantity), 0) AS total_stock,
+                           c.image_url
                     FROM cards c
                     JOIN sets s ON c.set_id = s.id
+                    LEFT JOIN inventory i ON i.card_id = c.id AND i.quantity > 0
+                    GROUP BY c.id, c.name, c.number, c.rarity, s.name, c.vector, c.image_url
                     ORDER BY distance
                     LIMIT 10
                     """,
@@ -87,7 +92,7 @@ class Handler(BaseHTTPRequestHandler):
                 cur.close()
                 conn.close()
                 results = [
-                    {"id": r[0], "name": r[1], "rarity": r[2], "set": r[3], "distance": round(r[4], 4)}
+                    {"id": r[0], "name": r[1], "number": r[2], "rarity": r[3], "set": r[4], "distance": round(r[5], 4), "min_price": float(r[6]) if r[6] else None, "stock": int(r[7]), "image_url": r[8]}
                     for r in rows
                 ]
                 self.send_json({"query": query, "results": results})
@@ -105,12 +110,17 @@ class Handler(BaseHTTPRequestHandler):
                 cur = conn.cursor()
                 cur.execute(
                     """
-                    SELECT c.id, c.name, c.rarity, s.name AS set_name
+                    SELECT c.id, c.name, c.number, c.rarity, s.name AS set_name,
+                           MIN(i.price) AS min_price,
+                           COALESCE(SUM(i.quantity), 0) AS total_stock,
+                           c.image_url
                     FROM cards c
                     JOIN sets s ON c.set_id = s.id
+                    LEFT JOIN inventory i ON i.card_id = c.id AND i.quantity > 0
                     WHERE c.name ILIKE %s
                        OR c.rarity ILIKE %s
                        OR s.name ILIKE %s
+                    GROUP BY c.id, c.name, c.number, c.rarity, s.name, c.image_url
                     LIMIT 10
                     """,
                     (f"%{query}%", f"%{query}%", f"%{query}%"),
@@ -119,10 +129,44 @@ class Handler(BaseHTTPRequestHandler):
                 cur.close()
                 conn.close()
                 results = [
-                    {"id": r[0], "name": r[1], "rarity": r[2], "set": r[3]}
+                    {"id": r[0], "name": r[1], "number": r[2], "rarity": r[3], "set": r[4], "min_price": float(r[5]) if r[5] else None, "stock": int(r[6]), "image_url": r[7]}
                     for r in rows
                 ]
                 self.send_json({"query": query, "results": results})
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+
+        if path == "/purchase":
+            try:
+                length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(length))
+                customer_id    = body["customer_id"]
+                inventory_id   = body["inventory_id"]
+                quantity       = body["quantity"]
+                payment_method = body["payment_method"]
+            except (KeyError, json.JSONDecodeError) as e:
+                self.send_json({"error": f"Invalid request body: {e}"}, 400)
+                return
+            try:
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute(
+                    "CALL process_purchase(%s, %s, %s, %s::payment_method, NULL)",
+                    (customer_id, inventory_id, quantity, payment_method),
+                )
+                order_id = cur.fetchone()[0]
+                conn.commit()
+                cur.close()
+                conn.close()
+                self.send_json({"status": "ok", "order_id": order_id})
             except Exception as e:
                 self.send_json({"error": str(e)}, 500)
 

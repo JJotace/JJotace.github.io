@@ -2,20 +2,406 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart DB — Pokémon Card Shop</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --border:    #2a2d3e;
+      --gold:      #c8a84b;
+      --gold-dim:  #8a6f2e;
+      --text:      #e8e8f0;
+      --muted:     #6b6e82;
+      --ir:        #4a9eff;
+      --ur:        #a855f7;
+      --sir:       #f59e0b;
+      --mar:       #ef4444;
+      --mhr:       #c8a84b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      letter-spacing: 0.03em;
+    }
+
+    .search-box {
+      max-width: 640px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      padding: 0.65rem 1rem;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .search-box button {
+      background: var(--gold);
+      color: #0f1117;
+      border: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.15s;
+    }
+
+    .search-box button:hover { opacity: 0.85; }
+
+    .tabs {
+      max-width: 640px;
+      margin: 0 auto 2rem;
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+      text-transform: uppercase;
+    }
+
+    .tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    .tab-desc {
+      max-width: 640px;
+      margin: -1.25rem auto 1.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .results {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .card-img {
+      width: 52px;
+      height: 72px;
+      object-fit: contain;
+      border-radius: 4px;
+      flex-shrink: 0;
+      background: var(--border);
+    }
+
+    .card-img-placeholder {
+      width: 52px;
+      height: 72px;
+      flex-shrink: 0;
+    }
+
+    .card-left { flex: 1; min-width: 0; }
+
+    .card-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-number {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .card-price {
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-top: 0.2rem;
+      font-weight: 600;
+    }
+
+    .stock {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-left: 0.4rem;
+    }
+
+    .card-price.out {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .card-set {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-ir  { background: #1a3a5c; color: var(--ir); }
+    .badge-ur  { background: #2d1a4a; color: var(--ur); }
+    .badge-sir { background: #3d2a00; color: var(--sir); }
+    .badge-mar { background: #3d1a1a; color: var(--mar); }
+    .badge-mhr { background: #2d2000; color: var(--mhr); }
+    .badge-default { background: var(--border); color: var(--muted); }
+
+    .distance {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 2.5rem 0;
+    }
+
+    .error {
+      text-align: center;
+      color: #ef4444;
+      font-size: 0.85rem;
+      padding: 2rem 0;
+    }
+
+    .count {
+      max-width: 640px;
+      margin: 0 auto 0.75rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .card-img {
+      cursor: zoom-in;
+    }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 360px;
+      max-height: 80vh;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(0,0,0,0.8);
+    }
+  </style>
 </head>
 <body>
-  <h1>Smart DB Search</h1>
-  <input id="q" type="text" placeholder="Search cards..." />
+
+<header>
+  <h1>Smart DB</h1>
+  <p>Pokémon Card Shop — Database Demo</p>
+</header>
+
+<div class="search-box">
+  <input id="q" type="text" placeholder="Search cards..." autocomplete="off" />
   <button onclick="search()">Search</button>
-  <pre id="results"></pre>
-  <script>
-    async function search() {
-      const q = document.getElementById('q').value;
-      const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-vector" onclick="switchTab('vector')">Semantic</div>
+  <div class="tab" id="tab-like" onclick="switchTab('like')">LIKE</div>
+</div>
+
+<div class="tab-desc" id="tab-desc">Finds cards by meaning — tolerates typos and partial matches.</div>
+
+<div class="count" id="count"></div>
+<div class="results" id="results"></div>
+
+<script>
+  let mode = 'vector';
+
+  document.getElementById('q').addEventListener('keydown', e => {
+    if (e.key === 'Enter') search();
+  });
+
+  function switchTab(m) {
+    mode = m;
+    document.getElementById('tab-vector').classList.toggle('active', m === 'vector');
+    document.getElementById('tab-like').classList.toggle('active', m === 'like');
+    document.getElementById('tab-desc').textContent = m === 'vector'
+      ? 'Finds cards by meaning — tolerates typos and partial matches.'
+      : 'Finds cards by exact substring match in name, rarity, or set.';
+    const q = document.getElementById('q').value.trim();
+    if (q) search();
+  }
+
+  function rarityBadgeClass(rarity) {
+    const r = rarity.toLowerCase();
+    if (r.includes('mega hyper'))          return 'badge-mhr';
+    if (r.includes('mega attack'))         return 'badge-mar';
+    if (r.includes('special illustration')) return 'badge-sir';
+    if (r.includes('ultra'))               return 'badge-ur';
+    if (r.includes('illustration'))        return 'badge-ir';
+    return 'badge-default';
+  }
+
+  function renderResults(results, showDistance) {
+    const container = document.getElementById('results');
+    const count = document.getElementById('count');
+
+    if (!results || results.length === 0) {
+      count.textContent = '';
+      container.innerHTML = '<div class="empty">No cards found.</div>';
+      return;
     }
-  </script>
+
+    count.textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
+    container.innerHTML = results.map(r => `
+      <div class="card">
+        ${r.image_url
+          ? `<img class="card-img" src="${r.image_url}" alt="${r.name}" loading="lazy" onerror="this.style.display='none'" onclick="openLightbox('${r.image_url}', '${r.name}')">`
+          : `<div class="card-img-placeholder"></div>`}
+        <div class="card-left">
+          <div class="card-name">${r.name} <span class="card-number">· ${r.number}</span></div>
+          <div class="card-set">${r.set}</div>
+          ${r.min_price != null
+            ? `<div class="card-price">from $${r.min_price.toFixed(2)} <span class="stock">${r.stock} in stock</span></div>`
+            : `<div class="card-price out">Out of stock</div>`}
+        </div>
+        <div class="card-right">
+          <span class="badge ${rarityBadgeClass(r.rarity)}">${r.rarity}</span>
+          ${showDistance ? `<span class="distance">dist ${r.distance}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function search() {
+    const q = document.getElementById('q').value.trim();
+    if (!q) return;
+
+    const container = document.getElementById('results');
+    const count = document.getElementById('count');
+    container.innerHTML = '<div class="empty">Searching…</div>';
+    count.textContent = '';
+
+    try {
+      const endpoint = mode === 'vector'
+        ? `/search?q=${encodeURIComponent(q)}`
+        : `/search/like?q=${encodeURIComponent(q)}`;
+      const res = await fetch(endpoint);
+      const data = await res.json();
+
+      if (data.error) {
+        container.innerHTML = `<div class="error">${data.error}</div>`;
+        return;
+      }
+
+      renderResults(data.results, mode === 'vector');
+    } catch (e) {
+      container.innerHTML = `<div class="error">Could not reach the service.</div>`;
+    }
+  }
+
+  function openLightbox(src, alt) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-img').alt = alt;
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+</script>
+
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
 </body>
 </html>

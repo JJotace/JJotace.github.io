@@ -29,14 +29,76 @@ Burndown Chart
 ## Story Outcomes
 
 
-
 ## 2.1 Docker Compose Setup
+ 
+**Points:** 3 | **Status:** Complete
+ 
+### Goal
+ 
+Set up the full stack — PostgreSQL with pgvector and the Python service — in Docker Compose so the entire environment starts with a single command.
+ 
+---
+ 
+### Compose file
+ 
+Two services are defined in `docker-compose.yml`, each running as a separate container:
+ 
+- `smart_db_postgres` — the PostgreSQL database
+- `smart_db_service` — the Python HTTP service
+**`postgres`** — runs `pgvector/pgvector:pg16`, which includes the pgvector extension pre-installed. The `./postgres/init` directory is mounted into `/docker-entrypoint-initdb.d`, which PostgreSQL uses to automatically execute SQL files on first start. A named volume (`postgres_data`) ensures data persists across container restarts.
+ 
+A healthcheck is configured:
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U smart_user -d smart_db"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+```
+ 
+**`python-service`** — built from `./python-service/Dockerfile`. Uses `depends_on` with `condition: service_healthy`, so the Python service only starts once PostgreSQL has passed its healthcheck. This prevents connection errors on startup.
+ 
+---
+ 
+### Starting the stack
+ 
+```bash
+docker compose up
+```
+ 
+![Connection_Test](../../resources/images/connection_test.png)
+ 
+The terminal output confirms both containers started successfully and `smart_db_postgres` reached `Healthy` status before the Python service initialised.
+ 
+The connection was verified in DBeaver against `host 172.17.117.28`, port `5432`, database `smart_db` — confirming PostgreSQL 16.14 was reachable from outside the container.
+ 
+---
+ 
+## 2.2 PostgreSQL Schema Implementation
+ 
+**Points:** 5 | **Status:** Complete
+ 
+### Goal
+ 
+Apply the schema designed in Sprint 1 to the running PostgreSQL instance.
+ 
+---
+ 
+### Schema creation
+ 
+The schema was applied by piping `02_schema.sql` into `psql` inside the running container:
+ 
+```bash
+docker exec -i smart_db_postgres psql -U smart_user -d smart_db < postgres/init/02_schema.sql
+```
+ 
+![schema_creation](../../resources/images/db_schema_creation.png)
+ 
+PostgreSQL confirmed creation of 5 ENUMs, 9 tables, and 5 indexes.
+ 
+The schema design decisions — normalisation, constraints, and index choices — are documented in [2.4 3NF Schema Documentation](#24-3nf-schema-documentation).
 
-
-
-## 2.2 PostgresSQL Schema Implementation
-
-
+---
 
 ## Story 2.3 — Database Abstractions: Triggers, Stored Procedures, Functions
  
@@ -830,9 +892,352 @@ Vector search still surfaces all 3 Charizard X ex variants and Mega Charizard Y 
 | Vector search | ✓ Correct results, distances 0.98–1.04 | ✓ Charizards in top 5, distances 1.11–1.16 |
 | LIKE search | ✓ Exact matches only | ✗ No results |
 
-**Conclusion:** For clean queries both approaches return the same relevant cards. The difference is typo tolerance — LIKE fails completely on `charirzard`, vector search recovers the correct cards. The trade-off is precision: vector search always returns 10 results ranked by distance, including noise, while LIKE returns only exact matches with no ranking. For a card shop where users may mistype names, vector search provides meaningful resilience that LIKE cannot.
+**Conclusion:** For clean queries both approaches return the same relevant cards. The difference is typo tolerance — LIKE fails completely on `charirzard`, vector search recovers the correct cards. The trade-off is precision; vector search is configured to always returns 10 results ranked by distance, including noise, while LIKE returns only exact matches. For a card shop where users are likely mistype names, vector search provides meaningful resilience that LIKE cannot.
 
-The distances on the typo query (1.11–1.18) are noticeably higher than the clean query (0.98–1.04), showing the model's reduced confidence — the results are correct but the signal is weaker.
+The distances on the typo query (1.11–1.18) are higher than the clean query (0.98–1.04), showing that the model has lower confidence on the result.
+
+---
+
+## 2.6 Python Service
+
+**Points:** 5 | **Status:** Complete
+
+### Goal
+
+Build a minimal Python service that connects to PostgreSQL, calls stored procedures programmatically, and exposes semantic search — all running inside Docker Compose alongside the database.
+
+---
+
+### Design
+
+The service is intentionally minimal. The database contains all business logic — the service only connects to it and exposes endpoints. No framework was used; Python's built-in `http.server` is sufficient for the scope.
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/` | GET | Serves the search frontend |
+| `/health` | GET | Confirms database connectivity |
+| `/search` | GET | Semantic search via pgvector |
+| `/search/like` | GET | LIKE search for comparison |
+| `/purchase` | POST | Calls `process_purchase` stored procedure |
+
+---
+
+### Stored procedure call — `/purchase`
+
+The purchase endpoint accepts a JSON body and calls `process_purchase` directly. All business logic — stock check, inventory deduction, order creation, payment, delivery — runs inside the stored procedure. The service passes parameters and returns the created `order_id`.
+
+```python
+cur.execute(
+    "CALL process_purchase(%s, %s, %s, %s::payment_method, NULL)",
+    (customer_id, inventory_id, quantity, payment_method),
+)
+order_id = cur.fetchone()[0]
+conn.commit()
+```
+
+**Example request:**
+```bash
+curl -X POST http://localhost:8000/purchase \
+  -H "Content-Type: application/json" \
+  -d '{"customer_id": 1, "inventory_id": 1, "quantity": 1, "payment_method": "credit_card"}'
+```
+
+**Response:**
+```json
+{"status": "ok", "order_id": 22}
+```
+
+**Resulting database state (order 22):**
+
+| order_id | order_status | quantity | unit_price | method | payment_status | address | delivery_status |
+|---|---|---|---|---|---|---|---|
+| 22 | pending | 1 | 9.12 | credit_card | pending | Bahnhofstrasse 1, Zurich | pending |
+
+One call to the service created rows across `orders`, `order_items`, `payments`, and `deliveries` atomically. Inventory quantity was decremented. If any step had failed, the entire transaction would have rolled back.
+
+---
+
+### Real purchase — Mega Dragonite ex (Ascended Heroes)
+
+To demonstrate a realistic scenario, a second purchase was made for a specific card by first finding its inventory id:
+
+```bash
+curl -X POST http://localhost:8000/purchase \
+  -H "Content-Type: application/json" \
+  -d '{"customer_id": 1, "inventory_id": 289, "quantity": 1, "payment_method": "credit_card"}'
+```
+
+**Response:**
+```json
+{"status": "ok", "order_id": 23}
+```
+
+**Resulting database state (order 23):**
+
+| order_id | order_status | card | set_name | quantity | unit_price | method | payment_status | address | delivery_status |
+|---|---|---|---|---|---|---|---|---|---|
+| 23 | pending | Mega Dragonite ex | Ascended Heroes | 1 | 60.62 | credit_card | pending | Bahnhofstrasse 1, Zurich | pending |
+
+---
+
+### Out of stock rejection
+
+Attempting a second purchase of the same card immediately after returned an error — inventory was already at 0:
+
+```json
+{"error": "Insufficient stock: requested 1, available 0"}
+```
+
+The stored procedure's stock check and `SELECT FOR UPDATE` lock prevented the purchase. No rows were written to any table.
+
+---
+
+### Semantic search
+
+The `/search` endpoint accepts a query, generates an embedding via `sentence-transformers`, and returns the 10 nearest cards by vector distance. Full implementation details, example queries, and results are documented in [2.5 Semantic Search Implementation](#25-semantic-search-implementation-pgvector).
+
+---
+
+### Usage
+
+```bash
+# Start the stack
+docker compose up -d
+
+# Import cards and generate embeddings (first run only)
+docker exec smart_db_service python import_cards.py
+
+# Health check
+curl http://localhost:8000/health
+
+# Semantic search
+curl "http://localhost:8000/search?q=charizard"
+
+# LIKE search
+curl "http://localhost:8000/search/like?q=charizard"
+
+# Purchase (example command)
+curl -X POST http://localhost:8000/purchase \
+  -H "Content-Type: application/json" \
+  -d '{"customer_id": 1, "inventory_id": 1, "quantity": 1, "payment_method": "credit_card"}'
+```
+
+
+---
+
+## 2.7 Views
+
+**Points:** 3 | **Status:** Complete
+
+### Goal
+
+Create reusable views over commonly needed queries so that data can be read in a useful format without repeating complex joins.
+
+---
+
+### Views implemented
+
+#### 1. `inventory_value`
+
+Total value of current stock per inventory entry (`quantity * price`). Useful for assessing which cards represent the highest tied-up capital.
+
+```sql
+SELECT * FROM inventory_value LIMIT 5;
+```
+
+| card_name | rarity | set_name | condition | quantity | price | total_value |
+|---|---|---|---|---|---|---|
+| Acerola's Mischief | Special Illustration Rare | Mega Evolution | mint | 3 | 79.11 | 237.33 |
+| Mega Gengar ex | Special Illustration Rare | Ascended Heroes | mint | 3 | 78.52 | 235.56 |
+| Mega Zygarde ex | Special Illustration Rare | Perfect Order | mint | 3 | 78.20 | 234.60 |
+| Mega Charizard Y ex | Mega Hyper Rare | Ascended Heroes | mint | 1 | 217.23 | 217.23 |
+| Mega Starmie ex | Special Illustration Rare | Perfect Order | mint | 3 | 72.31 | 216.93 |
+
+---
+
+#### 2. `top_selling_cards`
+
+Cards ranked by total units sold. Useful for identifying which cards move fastest.
+
+```sql
+SELECT * FROM top_selling_cards LIMIT 5;
+```
+
+| card_name | rarity | set_name | units_sold | revenue |
+|---|---|---|---|---|
+| Bulbasaur | Illustration Rare | Mega Evolution | 3 | 27.36 |
+| Mega Dragonite ex | Special Illustration Rare | Ascended Heroes | 1 | 60.62 |
+
+---
+
+#### 3. `low_stock`
+
+Inventory entries with quantity ≤ 2. Useful for identifying cards that need restocking soon.
+
+```sql
+SELECT * FROM low_stock LIMIT 5;
+```
+
+| card_name | rarity | set_name | condition | quantity | price |
+|---|---|---|---|---|---|
+| Mega Dragonite ex | Special Illustration Rare | Ascended Heroes | mint | 0 | 60.62 |
+| Acerola's Mischief | Ultra Rare | Mega Evolution | mint | 1 | 9.03 |
+| Air Balloon | Ultra Rare | Mega Evolution | near_mint | 1 | 14.55 |
+| Anthea & Concordia | Ultra Rare | Ascended Heroes | mint | 1 | 18.63 |
+| Anthea & Concordia | Ultra Rare | Ascended Heroes | excellent | 1 | 12.11 |
+
+---
+
+#### 4. `out_of_stock`
+
+Inventory entries with quantity = 0. Useful for knowing exactly which cards cannot currently be sold.
+
+```sql
+SELECT * FROM out_of_stock LIMIT 5;
+```
+
+| card_name | rarity | set_name | condition | price |
+|---|---|---|---|---|
+| Mega Dragonite ex | Special Illustration Rare | Ascended Heroes | mint | 60.62 |
+
+The Mega Dragonite ex appears here because it was purchased during the 2.6 demo, driving stock to 0.
+
+---
+
+#### 5. `revenue_by_set`
+
+Total revenue grouped by set. Useful for understanding which sets are generating the most sales.
+
+```sql
+SELECT * FROM revenue_by_set;
+```
+
+| set_name | items_sold | total_revenue |
+|---|---|---|
+| Ascended Heroes | 1 | 60.62 |
+| Mega Evolution | 3 | 27.36 |
+
+---
+
+#### 6. `order_summary`
+
+One row per order showing customer, card, payment, and delivery status. Replaces a multi-table join for any order overview query, and computes `order_total` from `order_items` directly — no stored total column needed.
+
+```sql
+SELECT * FROM order_summary;
+```
+
+| order_id | customer_name | card_name | rarity | set_name | quantity | unit_price | order_total | order_status | payment_method | payment_status | delivery_status |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 23 | Juan Cardoso | Mega Dragonite ex | Special Illustration Rare | Ascended Heroes | 1 | 60.62 | 60.62 | pending | credit_card | pending | pending |
+| 22 | Juan Cardoso | Bulbasaur | Illustration Rare | Mega Evolution | 1 | 9.12 | 9.12 | pending | credit_card | pending | pending |
+| 21 | Juan Cardoso | Bulbasaur | Illustration Rare | Mega Evolution | 1 | 9.12 | 9.12 | pending | credit_card | pending | pending |
+| 20 | Juan Cardoso | Bulbasaur | Illustration Rare | Mega Evolution | 1 | 9.12 | 9.12 | pending | credit_card | pending | pending |
+
+---
+
+### Summary
+
+| View | Purpose |
+|---|---|
+| inventory_value | Stock value per entry |
+| top_selling_cards | Units sold and revenue ranking |
+| low_stock | Entries with quantity ≤ 2 |
+| out_of_stock | Entries with quantity = 0 |
+| revenue_by_set | Revenue grouped by set |
+| order_summary | Full order overview across all related tables |
+
+---
+
+## 2.9 Performance Benchmarking (Vector vs LIKE)
+ 
+**Points:** 5 | **Status:** Dropped
+ 
+This story was a MoSCoW **Should have**. The comparison of vector search and LIKE was covered directly in [2.5 Semantic Search Implementation](#25-semantic-search-implementation-pgvector) with real query results and a conclusions table. Dropped per MoSCoW prioritisation — no technical content was lost.
+No real performance benchmarking was possible, the dataset is too small and there is no noticeable difference in query execution time.
+The real takeaway from Vector vs LIKE is being able to have customers write typos and have results delivered to them regardless, along with some extra results that may result in extra purchases, since the customer may otherwise never have seen the product.
+ 
+---
+
+## 2.10 TCG Price & Image Sync
+ 
+**Points:** 3 | **Status:** Complete
+ 
+### Goal
+ 
+Replace the placeholder seed prices in `inventory` with real TCGPlayer market prices, and populate `cards.image_url` with card images — both fetched from the TCG Price Lookup API. This is a **Could have** in MoSCoW; the database functions without it, but it makes the demo a lot more realistic and meaningful, specially with the addition of the image of the actual product, which not everyone is familiar with.
+ 
+---
+ 
+### How it works
+ 
+`sync_prices.py` fetches current market data from the TCG Price Lookup API (free tier, 200 requests/day). For each card:
+ 
+1. Searches by card name and number — the API uses the format `"Mega Charizard X ex - 125/094"`, so name and number are combined to get an exact match.
+2. Extracts the `near_mint` TCGPlayer market price as the base price.
+3. Derives condition-specific prices by applying multipliers (`mint=1.00`, `near_mint=0.85`, `excellent=0.65`, `good=0.45`, `played=0.25`, `poor=0.10`).
+4. Updates `inventory` via the `bulk_price_update` stored procedure — price changes are automatically logged to `price_history` via `trg_log_price_change`.
+5. Stores `image_url` directly on `cards`.
+Prices are stored in USD as received from TCGPlayer.
+
+**Note** that the condition multipliers for the cards are made-up, these values vary from card to card and there is no set standard, but for the purpose of this project and to not overcomplicate everything,  multipliers were used.
+ 
+**Rate limit handling:** 3 seconds between API requests to stay within the 200 req/day limit. The script supports `--dry-run` for previewing changes and `--rarity` for targeting specific rarities.
+ 
+---
+ 
+### Sync run — Special Illustration Rare
+ 
+45 API requests were made targeting Special Illustration Rare cards. The daily limit was reached mid-run at card 35, after fixing most of the errors caused during testing.
+ 
+```
+Prices found   : 31
+Images found   : 33
+Not found      : 12  (2 not found by name, 10 hit 429 rate limit)
+ 
+Inventory entries updated : 22
+Images stored             : 33
+```
+ 
+**Notable prices synced:**
+ 
+| Card | Price (NM) |
+|---|---|
+| Mega Gengar ex | $1,398.44 |
+| Mega Charizard X ex | $833.09 |
+| Mega Dragonite ex | $874.63 |
+| Team Rocket's Mewtwo ex | $462.55 |
+| Mega Lucario ex | $233.24 |
+ 
+**Not found / rate-limited:** `Rotom ex` and `Pikachu ex` were not found by the API (likely not indexed under those names). Cards 36–45 hit HTTP 429 before completing — the daily limit was exhausted. These will be retried on the next day's quota, but serves as a good example for the documentation, as it hits a few interesting possible test cases.
+ 
+---
+ 
+### Interaction with `trg_log_price_change`
+ 
+`bulk_price_update` updates `inventory.price` row by row. For each row where the new price differs from the old, `trg_log_price_change` fires automatically and writes a row to `price_history`. The sync script does not need to write to `price_history` directly — the trigger handles it.
+ 
+The `IS DISTINCT FROM` guard in the trigger means cards whose price hasn't changed (9 inventory entries were skipped as unchanged) produce no audit row.
+ 
+---
+ 
+### Schema change — `cards.image_url`
+ 
+`image_url` was not in the original schema — it was added as a migration after Sprint 2 was underway:
+ 
+```sql
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS image_url TEXT;
+```
+ 
+This is `08_add_image_url.sql`. It runs after the base schema and is safe to re-run (`IF NOT EXISTS`). The column is nullable — cards without a synced image simply show no image in the frontend.
+ 
+---
+ 
+### Reflection
+ 
+The 200 req/day free tier limit was tighter than expected. Targeting all 242 cards in one run is not possible — the full catalogue requires roughly 242 requests plus overhead. The current approach (target by rarity, run across multiple days) works within the constraint, which is fine for this projects purpose, but the testing and fixing phase took quite a few API calls that resulted in a lower than expected amount of cards added onto the database, but at least it doesn't cost anything, which is overall positive.
+
+One card matching issue: two cards (`Rotom ex`, `Pikachu ex`) were not found even though the name and number matched the CSV. The API may index them under a different name format. These were left without prices and images rather than applying incorrect data.
 
 ---
 
