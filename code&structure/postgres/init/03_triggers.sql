@@ -20,8 +20,8 @@
 CREATE OR REPLACE FUNCTION fn_log_price_change()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO price_history (inventory_id, old_price, new_price)
-    VALUES (OLD.id, OLD.price, NEW.price);
+    INSERT INTO price_history (inventory_id, new_price)
+    VALUES (OLD.id, NEW.price);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

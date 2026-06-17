@@ -4,7 +4,7 @@
 -- Run after: 01_extensions.sql, 02_schema.sql, 03_triggers.sql,
 --            04_stored_procedures.sql, and CSV imports.
 -- Each test is a self-contained block. Expected outcomes are
--- noted in comments. Wrap in BEGIN/ROLLBACK to leave DB clean.
+-- noted in comments. BEGIN/ROLLBACK removes test changes.
 -- =============================================================
 
 
@@ -65,13 +65,18 @@ $$;
 
 -- =============================================================
 -- TEST 2: Trigger — price change is logged to price_history
--- Expected: one row in price_history after price update
+-- Expected: one new row in price_history with new_price = 59.99,
+--           and the previous price is correctly recoverable via
+--           LAG() over new_price (old_price column was removed —
+--           see project.md 3NF notes: it was a transitive
+--           dependency, derivable from the prior row's new_price)
 -- =============================================================
 
 DO $$
 DECLARE
-    v_old_price NUMERIC(10,2);
-    v_count     INT;
+    v_old_price   NUMERIC(10,2);
+    v_count       INT;
+    v_derived_old NUMERIC(10,2);
 BEGIN
     SELECT price INTO v_old_price FROM inventory WHERE id = (SELECT inv_id FROM test_ctx);
 
@@ -79,12 +84,24 @@ BEGIN
 
     SELECT COUNT(*) INTO v_count
     FROM price_history
-    WHERE inventory_id = (SELECT inv_id FROM test_ctx) AND old_price = v_old_price AND new_price = 59.99;
+    WHERE inventory_id = (SELECT inv_id FROM test_ctx) AND new_price = 59.99;
 
-    IF v_count = 1 THEN
-        RAISE NOTICE 'TEST 2 PASSED: price change logged correctly (% -> 59.99)', v_old_price;
+    -- Confirm the "old" price is still recoverable without storing it:
+    -- it's the new_price of the immediately preceding row.
+    SELECT old_price INTO v_derived_old
+    FROM (
+        SELECT new_price,
+               LAG(new_price) OVER (PARTITION BY inventory_id ORDER BY changed_at) AS old_price
+        FROM price_history
+        WHERE inventory_id = (SELECT inv_id FROM test_ctx)
+    ) sub
+    WHERE new_price = 59.99;
+
+    IF v_count = 1 AND v_derived_old = v_old_price THEN
+        RAISE NOTICE 'TEST 2 PASSED: price change logged correctly (% -> 59.99, derived old_price matches)', v_old_price;
     ELSE
-        RAISE WARNING 'TEST 2 FAILED: expected 1 price_history row, found %', v_count;
+        RAISE WARNING 'TEST 2 FAILED: rows found=%, derived old_price=% (expected %)',
+            v_count, v_derived_old, v_old_price;
     END IF;
 
     -- Reset price for subsequent tests
@@ -313,35 +330,105 @@ $$;
 
 
 -- =============================================================
--- TEST 9: SP bulk_price_update — updates prices, triggers logging
--- Expected: prices updated, price_history rows created
+-- TEST 9: SP bulk_price_update — updates prices for MULTIPLE
+--          inventory entries in a single call
+-- Expected: both rows updated to their respective new prices,
+--           one price_history row created per changed row
 -- =============================================================
-
+ 
 DO $$
 DECLARE
-    v_new_price   NUMERIC(10, 2);
-    v_hist_count  INT;
-    v_inv_id      INT;
+    v_inv_id1     INT;
+    v_inv_id2     INT;
+    v_price1      NUMERIC(10, 2);
+    v_price2      NUMERIC(10, 2);
+    v_hist_count1 INT;
+    v_hist_count2 INT;
 BEGIN
-    SELECT inv_id INTO v_inv_id FROM test_ctx;
-    -- Reset to known price (different from 75.00 so bulk_price_update is a real change)
-    UPDATE inventory SET price = 49.99 WHERE id = v_inv_id;
-    DELETE FROM price_history WHERE inventory_id = v_inv_id;
-
+    SELECT inv_id INTO v_inv_id1 FROM test_ctx;
+    SELECT inv_id INTO v_inv_id2 FROM test_ctx2;
+ 
+    -- Reset both to known prices (different from targets so the update is real)
+    UPDATE inventory SET price = 49.99 WHERE id = v_inv_id1;
+    UPDATE inventory SET price = 39.99 WHERE id = v_inv_id2;
+    DELETE FROM price_history WHERE inventory_id IN (v_inv_id1, v_inv_id2);
+ 
+    -- Single call, two distinct inventory entries — this is the actual
+    -- "bulk" case the procedure is named for.
     CALL bulk_price_update(
-        ARRAY[ROW(v_inv_id, 75.00)::price_update_input]
+        ARRAY[
+            ROW(v_inv_id1, 75.00)::price_update_input,
+            ROW(v_inv_id2, 55.00)::price_update_input
+        ]
     );
-
-    SELECT price INTO v_new_price FROM inventory WHERE id = (SELECT inv_id FROM test_ctx);
-    SELECT COUNT(*) INTO v_hist_count FROM price_history WHERE inventory_id = (SELECT inv_id FROM test_ctx);
-
-    IF v_new_price = 75.00 AND v_hist_count = 1 THEN
-        RAISE NOTICE 'TEST 9 PASSED: price updated to %, history row created', v_new_price;
+ 
+    SELECT price INTO v_price1 FROM inventory WHERE id = v_inv_id1;
+    SELECT price INTO v_price2 FROM inventory WHERE id = v_inv_id2;
+    SELECT COUNT(*) INTO v_hist_count1 FROM price_history WHERE inventory_id = v_inv_id1 AND new_price = 75.00;
+    SELECT COUNT(*) INTO v_hist_count2 FROM price_history WHERE inventory_id = v_inv_id2 AND new_price = 55.00;
+ 
+    IF v_price1 = 75.00 AND v_price2 = 55.00
+       AND v_hist_count1 = 1 AND v_hist_count2 = 1 THEN
+        RAISE NOTICE 'TEST 9 PASSED: bulk update applied to 2 entries (% , %), each logged once', v_price1, v_price2;
     ELSE
-        RAISE WARNING 'TEST 9 FAILED: price=%, history_rows=%', v_new_price, v_hist_count;
+        RAISE WARNING 'TEST 9 FAILED: price1=%, price2=%, hist1=%, hist2=%',
+            v_price1, v_price2, v_hist_count1, v_hist_count2;
     END IF;
+END;
+$$;
+ 
+ 
+-- =============================================================
+-- TEST 10: SP bulk_price_update — rollback when one entry in the
+--          array is invalid
+-- Expected: the entire call fails (exception raised), and NEITHER
+--           row is updated — proves the loop is atomic across all
+--           entries in the array, not just per-row
+-- =============================================================
+ 
+DO $$
+DECLARE
+    v_inv_id1      INT;
+    v_inv_id2      INT;
+    v_price1_before NUMERIC(10, 2);
+    v_price2_before NUMERIC(10, 2);
+    v_price1_after  NUMERIC(10, 2);
+    v_price2_after  NUMERIC(10, 2);
+BEGIN
+    SELECT inv_id INTO v_inv_id1 FROM test_ctx;
+    SELECT inv_id INTO v_inv_id2 FROM test_ctx2;
+ 
+    UPDATE inventory SET price = 20.00 WHERE id = v_inv_id1;
+    UPDATE inventory SET price = 30.00 WHERE id = v_inv_id2;
+ 
+    SELECT price INTO v_price1_before FROM inventory WHERE id = v_inv_id1;
+    SELECT price INTO v_price2_before FROM inventory WHERE id = v_inv_id2;
+ 
+    BEGIN
+        -- First entry is valid; second entry has a non-positive price,
+        -- which bulk_price_update explicitly rejects.
+        CALL bulk_price_update(
+            ARRAY[
+                ROW(v_inv_id1, 99.00)::price_update_input,
+                ROW(v_inv_id2, -5.00)::price_update_input
+            ]
+        );
+        RAISE WARNING 'TEST 10 FAILED: expected exception was not raised';
+    EXCEPTION
+        WHEN OTHERS THEN
+            SELECT price INTO v_price1_after FROM inventory WHERE id = v_inv_id1;
+            SELECT price INTO v_price2_after FROM inventory WHERE id = v_inv_id2;
+ 
+            IF v_price1_after = v_price1_before AND v_price2_after = v_price2_before THEN
+                RAISE NOTICE 'TEST 10 PASSED: invalid entry rejected, both rows unchanged (% , %)',
+                    v_price1_after, v_price2_after;
+            ELSE
+                RAISE WARNING 'TEST 10 FAILED: rows changed despite exception (price1 % -> %, price2 % -> %)',
+                    v_price1_before, v_price1_after, v_price2_before, v_price2_after;
+            END IF;
+    END;
 END;
 $$;
 
 
-ROLLBACK;  -- Clean up — remove ROLLBACK and replace with COMMIT to persist test data
+ROLLBACK;  -- Clean up, can be removed in case test data needs to be kept for some reason.

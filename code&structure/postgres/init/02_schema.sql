@@ -69,7 +69,6 @@ CREATE INDEX idx_inventory_card_id ON inventory(card_id);
 CREATE TABLE price_history (
     id            SERIAL PRIMARY KEY,
     inventory_id  INT            NOT NULL REFERENCES inventory(id),
-    old_price     NUMERIC(10, 2) NOT NULL,
     new_price     NUMERIC(10, 2) NOT NULL,
     changed_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );

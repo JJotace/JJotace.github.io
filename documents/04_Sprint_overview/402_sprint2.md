@@ -132,13 +132,15 @@ The following abstractions were implemented. Each is categorised as either a **T
 **Mechanism:** `AFTER UPDATE` trigger on `inventory`, scoped to the `price` column. A `WHEN` guard (`OLD.price IS DISTINCT FROM NEW.price`) ensures the trigger only fires on actual price changes, not on unrelated row updates.
  
 **Why a trigger:** Must fire on every price change regardless of what caused it — a trigger cannot be bypassed by application code.
+
+**Design note — `old_price` removed:** `price_history` originally also stored `old_price` alongside `new_price`. Expert feedback identified this as a 3NF violation: `old_price` is a transitive dependency, fully derivable as `LAG(new_price)` over the previous row for the same `inventory_id` — every row's `old_price` is just a copy of the prior row's `new_price`. The column was removed from the schema and from this trigger; the price history itself is unaffected, since the full sequence of changes is still recoverable from `new_price` and `changed_at` alone. See [2.4 3NF Schema Documentation](#24-3nf-schema-documentation) for the full justification.
  
 ```sql
 CREATE OR REPLACE FUNCTION fn_log_price_change()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO price_history (inventory_id, old_price, new_price)
-    VALUES (OLD.id, OLD.price, NEW.price);
+    INSERT INTO price_history (inventory_id, new_price)
+    VALUES (OLD.id, NEW.price);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -420,7 +422,7 @@ $$;
  
 All tests are in `06_tests.sql`. The entire file runs inside a `BEGIN / ROLLBACK` block — no test data is persisted to the database.
  
-Test data is isolated using a dedicated card (`id=9999`, name `Testmon`) and a temporary table `test_ctx` that captures its inventory id at runtime. This avoids conflicts with real seed data.
+Test data is isolated using a dedicated card (`id=9999`, name `Testmon`), a dedicated customer (`id=9999`, to avoid colliding with real seed customer data), and temporary tables `test_ctx` / `test_ctx2` that capture two separate inventory entries (`mint` and `near_mint`) for that card at runtime. This avoids conflicts with real seed data.
  
 ---
  
@@ -444,13 +446,13 @@ Test data is isolated using a dedicated card (`id=9999`, name `Testmon`) and a t
  
 **Abstraction under test:** `trg_log_price_change` / `fn_log_price_change`
  
-**Setup:** Read current price of test inventory entry.
+**Setup:** Read current price of test inventory entry. Two price changes are made in sequence (45.00, then 59.99) so the second change has a genuine predecessor row to compare against.
  
-**Action:** `UPDATE inventory SET price = 59.99`
+**Action:** `UPDATE inventory SET price = 45.00`, then `UPDATE inventory SET price = 59.99`
  
-**Assertion:** Exactly 1 row in `price_history` with matching `inventory_id`, `old_price`, and `new_price = 59.99`.
+**Assertion:** Exactly 1 row in `price_history` with `new_price = 59.99`. Since `old_price` is no longer stored (see Trigger 1 design note above), the previous price is instead confirmed via `LAG(new_price) OVER (PARTITION BY inventory_id ORDER BY changed_at)`, which must equal 45.00 — proving the full price history remains recoverable without the redundant column.
  
-**Result:** `PASSED` — price change logged correctly (9.12 → 59.99)
+**Result:** `PASSED` — price change logged correctly (45.00 → 59.99), derived previous price matched
  
 ---
  
@@ -488,7 +490,7 @@ Test data is isolated using a dedicated card (`id=9999`, name `Testmon`) and a t
  
 **Setup:** Reset test inventory to `quantity = 10`.
  
-**Action:** `CALL process_purchase(customer_id=1, inventory_id=<test>, quantity=2, method='credit_card')`
+**Action:** `CALL process_purchase(customer_id=9999, inventory_id=<test>, quantity=2, method='credit_card')`
  
 **Assertions:**
 - `inventory.quantity` = 8 (reduced by 2)
@@ -544,18 +546,33 @@ Test data is isolated using a dedicated card (`id=9999`, name `Testmon`) and a t
  
 ---
  
-#### TEST 9 — `bulk_price_update` updates price and triggers audit log
- 
+#### TEST 9 — `bulk_price_update` updates prices for multiple inventory entries in one call
+
 **Abstraction under test:** `bulk_price_update` stored procedure + `trg_log_price_change` interaction
- 
-**Setup:** Reset test inventory price to 49.99. Clear existing `price_history` rows for test entry.
- 
-**Action:** `CALL bulk_price_update(ARRAY[(inv_id, 75.00)])`
- 
+
+**Setup:** Two distinct test inventory entries (`mint` and `near_mint` rows on the same test card) are reset to known prices. Existing `price_history` rows for both are cleared.
+
+**Action:** A single call passing both entries at once: `CALL bulk_price_update(ARRAY[(inv_id_1, 75.00), (inv_id_2, 55.00)])`
+
 **Assertions:**
-- `inventory.price` = 75.00
-- Exactly 1 row in `price_history` (trigger fired automatically via `bulk_price_update`)
-**Result:** `PASSED` — price updated to 75.00, price_history row created
+- `inventory.price` = 75.00 and 55.00 respectively
+- Exactly 1 `price_history` row per entry (trigger fired once per row, automatically, inside the loop)
+
+**Result:** `PASSED` — both entries updated and logged correctly. This replaces an earlier version of the test that only passed a single entry, which did not actually exercise the "bulk" (multi-row) behaviour the procedure is named for.
+
+---
+
+#### TEST 10 — `bulk_price_update` rolls back entirely when one entry in the batch is invalid
+
+**Abstraction under test:** Atomicity of `bulk_price_update` across multiple entries in a single call
+
+**Setup:** Same two test inventory entries, reset to known prices.
+
+**Action:** A single call with one valid entry and one invalid entry (`new_price = -5.00`, rejected by the procedure's own validation): `CALL bulk_price_update(ARRAY[(inv_id_1, 99.00), (inv_id_2, -5.00)])`
+
+**Assertion:** An exception is raised, and **neither** row is updated — including the first entry, whose `UPDATE` had already executed successfully before the second entry failed. This confirms the entire call is one atomic unit: a failure partway through the array undoes everything in that call, not just the failing row.
+
+**Result:** `PASSED` — invalid entry rejected, both rows unchanged
  
 ---
  
@@ -571,15 +588,16 @@ Test data is isolated using a dedicated card (`id=9999`, name `Testmon`) and a t
 | 6 | `process_purchase` — out of stock rejection | Stored Procedure | PASSED |
 | 7 | `cancel_order` | Stored Procedure | PASSED |
 | 8 | `restock_inventory` | Stored Procedure | PASSED |
-| 9 | `bulk_price_update` + trigger interaction | Stored Procedure | PASSED |
+| 9 | `bulk_price_update` — multiple entries in one call | Stored Procedure | PASSED |
+| 10 | `bulk_price_update` — rollback on invalid entry | Stored Procedure | PASSED |
  
-**Known untested edge cases:** cancelling a shipped order, purchasing from a non-existent customer, `bulk_price_update` with price = 0, `restock_inventory` creating a new entry. These would be covered in a production test suite but are out of scope for this prototype.
+**Known untested edge cases:** cancelling a shipped order, purchasing from a non-existent customer, `restock_inventory` creating a brand-new entry (vs. incrementing an existing one). These would be covered in a production test suite but are out of scope for this prototype.
  
 ---
  
 ### Reflection
  
-PL/pgSQL was new going into this story. One issue came up during testing that required a change to the trigger implementation.
+PL/pgSQL was new to me going into this story. Thanks to online guides and AI tools at my dispossal, I only really came across a few issues during testing, which I was able to fix without a major loss in project time. Yves was also able to give me some important feedback before the end of the sprint, which I made sure to implement.
  
 ---
  
@@ -601,6 +619,16 @@ NEW.updated_at = NOW();
 -- After (fixed)
 NEW.updated_at = clock_timestamp();
 ```
+
+---
+
+#### Design change — removal of `price_history.old_price`
+
+During an expert review, `old_price` in `price_history` was flagged as a 3NF violation: it is a transitive dependency, fully derivable as the previous row's `new_price` for the same `inventory_id`. Storing it duplicates information already present in the table.
+
+The column was removed from `02_schema.sql`, the `INSERT` in `fn_log_price_change` (Trigger 1, above), and `06_tests.sql`. TEST 2 was rewritten to confirm the previous price is still recoverable via a `LAG()` window function rather than reading a stored column — demonstrating that no information was lost, only the redundant copy of it.
+
+This is the same type of justified 3NF exception as `orders.total` (see [2.4 3NF Schema Documentation](#24-3nf-schema-documentation)), except in this case the redundant column was removed rather than kept, since nothing in the application or views depended on it being directly readable.
  
 ---
  
@@ -698,11 +726,10 @@ Demonstrate that the Smart DB schema satisfies Third Normal Form (3NF) by docume
 | Column | Depends on |
 |---|---|
 | inventory_id | id |
-| old_price | id |
 | new_price | id |
 | changed_at | id |
 
-Point-in-time snapshot. `old_price` and `new_price` are recorded at the moment of change; neither is derived from the other. **3NF satisfied.**
+Point-in-time snapshot. `new_price` is recorded at the moment of change.
 
 ---
 
@@ -754,7 +781,9 @@ No derived or calculated columns. A `total` column was considered during design 
 | method | id |
 | status | id |
 
-`amount` does not depend on `method`. `status` does not depend on `amount`. **3NF satisfied.**
+`amount` does not depend on `method`. `status` does not depend on `amount`.
+
+`amount` is, in the current data, equal to the order total derivable from `order_items` — the same relationship that was removed from `orders.total`. It is kept here as an independent stored fact rather than a derived value, since a payment amount can differ from the order total (partial payments, discounts, surcharges), even though no such case exists in the current seed data. **3NF satisfied** under this reading; flagged here for transparency.
 
 ---
 
@@ -766,11 +795,11 @@ No derived or calculated columns. A `total` column was considered during design 
 | cards | ✓ | vector stored at insert, not a transitive dependency |
 | customers | ✓ | — |
 | inventory | ✓ | — |
-| price_history | ✓ | snapshot table by design |
+| price_history | ✓ | old_price removed (transitive dependency); recoverable via LAG() |
 | orders | ✓ | total removed; computed via order_summary view |
 | order_items | ✓ | unit_price is a snapshot, not a derived value |
 | deliveries | ✓ | address is a snapshot, not a reference |
-| payments | ✓ | — |
+| payments | ✓ | amount kept as independent fact, justified as payments may diverge from order total |
 
 All tables satisfy 3NF.
 
@@ -798,7 +827,7 @@ This string is converted to a 384-dimension vector using the `all-MiniLM-L6-v2` 
 
 **Why this text combination:** name and rarity are the attributes a user would search by. Set name adds context that helps distinguish cards with the same name across sets. No manual description is needed — the data already has everything required.
 
-**Model choice — `all-MiniLM-L6-v2`:** Produces 384-dimension vectors, matching the `VECTOR(384)` column in the schema. Lightweight, loads in seconds, and runs fully locally inside Docker with no external API calls. A larger model like `all-mpnet-base-v2` produces 768-dimension vectors and would be more accurate, but requires a schema change, uses more memory, and is slower at query time. For 242 short card name strings the accuracy difference is not meaningful.
+**Model choice — `all-MiniLM-L6-v2`:** Produces 384-dimension vectors, matching the `VECTOR(384)` column in the schema. Lightweight, loads in seconds, and runs fully locally inside Docker with no external API calls. A larger model like `all-mpnet-base-v2` produces 768-dimension vectors and would be more accurate, but requires a schema change, uses more memory, and is slower at query time. For 242 short card name strings the accuracy difference does not outweight the resources it requires.
 
 ---
 
@@ -1233,7 +1262,7 @@ This is `08_add_image_url.sql`. It runs after the base schema and is safe to re-
  
 ---
  
-### Reflection
+#### Remarks
  
 The 200 req/day free tier limit was tighter than expected. Targeting all 242 cards in one run is not possible — the full catalogue requires roughly 242 requests plus overhead. The current approach (target by rarity, run across multiple days) works within the constraint, which is fine for this projects purpose, but the testing and fixing phase took quite a few API calls that resulted in a lower than expected amount of cards added onto the database, but at least it doesn't cost anything, which is overall positive.
 

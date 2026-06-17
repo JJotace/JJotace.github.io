@@ -1,7 +1,10 @@
 -- =============================================================
 -- Smart DB — Inventory Seed Data
 -- =============================================================
--- Pricing logic:
+-- This data was generated with AI to quickly populate the DB
+-- for testing and demonstration purposes.
+--
+-- Pricing logic that AI used for the data:
 --
 --   Base price range by rarity (CHF):
 --     Illustration Rare:          4.00 – 12.00

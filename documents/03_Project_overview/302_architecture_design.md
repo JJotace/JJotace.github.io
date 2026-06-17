@@ -172,7 +172,6 @@ erDiagram
     price_history {
         int id PK
         int inventory_id FK
-        numeric old_price
         numeric new_price
         timestamptz changed_at
     }
@@ -261,7 +260,6 @@ Index: `card_id`
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
 | inventory_id | INTEGER | FOREIGN KEY → inventory(id) |
-| old_price | NUMERIC | NOT NULL |
 | new_price | NUMERIC | NOT NULL |
 | changed_at | TIMESTAMP | DEFAULT NOW() |
 
