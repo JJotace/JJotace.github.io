@@ -1272,14 +1272,65 @@ One card matching issue: two cards (`Rotom ex`, `Pikachu ex`) were not found eve
 
 ## Sprint Review
 
-*To be completed at end of Sprint 2.*
 
-**Points committed:** 46 / **Points completed:** —
+**Points committed:** 46 / **Points completed:** 46
 
 ---
 
-## Retrospective
+## Burndown Chart
+ 
+```mermaid
+xychart-beta
+    title "Sprint 2 Burndown — Actual vs Ideal"
+    x-axis ["Jun 2", "Jun 5", "Jun 7", "Jun 10", "Jun 13/14", "Jun 18"]
+    y-axis "Story Points Remaining" 0 --> 44
+    line [44, 41, 36, 28, 1, 0]
+    line [44, 36, 30, 22, 14, 0]
+```
+ 
+---
 
-| What went well | What did not go well | What to change |
-|---|---|---|
-| | | |
+## Retrospective
+ 
+### 😊 What went well
+ 
+**A working database, built from scratch**
+
+My very first time working with actual database code resulted in an actual functional system. Not a prototype that technically runs, but a database with enforced constraints, atomic transactions, an audit trail, and a semantic search layer. Databases have always been an interest of mine at work, I have often been involved in supporting them or teaching others how to run queries or collect data, but I was never in the coding side of things, I barely knew how to write my own ```SELECT```. So all in all, very happy with the outcome, I have new skills that I can bring into my workplace.
+ 
+**Documentation kept up throughout the sprint**
+ 
+After each working session, I updated my documentation with what was done through that day. It was not continuous commit-by-commit documentation after every different topic, but it was good enough so that nothing was left unwritten at the end of the sprint, which is a real change compared to my previous projects, where the documentation was consistenly left as an afterthought, or for sprint 3. This time around, I feel like I have so much more time available to improve my documentation during the final sprint without feeling like I have too much pending to recover from previous sprints.
+ 
+**Working on something genuinely enjoyable**
+ 
+The project was genuinely enjoyable to work on. Working on a topic I care about - Pokémon TCG and databases - changed the dynamic entirely. During the work week I found myself thinking about improvements to make when I got home. The TCG price and image sync was a nice-to-have that was never part of the actual scope; it got built on a weekend because the motivation was there, not because it was needed. I spent eight hours on a single weekend day because I genuinely care about the topic of the project and wanted to make something that I would be proud to show in a demo. When I first finished the database, the price of the different cards was made-up and there were no pictures shown with the products, which I felt would be underwhelming as the project reviewers, since they probably do not know a whole lot about the topic at hand. Being able to see the product with how much it actually costs improves the quality of the project as a whole.
+ 
+**Using expert meetings actively, not as a formality**
+ 
+In this sprint I put deliberate effort into using Einzelbesprechungen as working sessions rather than checkpoints at the end when there is no time left to act on the feedback. Meeting with Yves while the implementation was still in progress meant his feedback on the schema could actually be applied — the `price_history.old_price` issue was caught and fixed before the sprint closed, not after. This approach is being carried forward into Sprint 3.
+The same can be said about the meetings with Florian, which always improves my documentation, structure and approach.
+ 
+---
+ 
+### 😟 What did not go well
+ 
+**Triggers and stored procedures: technically demanding and it showed**
+ 
+I think the complexity of creating triggers and stored procedures and testing everything, its not that it did not go very well but I did make some mistakes as yves pointed out that I had to fix, and it also is just a hard topic that I havent done before, so even if I have made my first database, I still dont think I know as much as I should.
+
+Creating Triggers, Stored Procedures and testing everything was really complex and lead to a few mistakes on the way, which thanks to Yves I was able to look back at and fix. I do have to admit, that even though I have already created my first database, I do not feel like I know as much as I should. Writting my own DB code and queries still feel like a blurry topic for me which will take some more time to learn, but all in all I definitely do know much more now than I did before.
+ 
+**Sprint 1 carrying over into Sprint 2**
+ 
+The late close of Sprint 1 carried over directly into Sprint 2. The first days of the sprint were not clean implementation work — documentation, risk management, and planning content that had not been properly finished were still open, which slowed the transition into coding. The Docker Compose setup and schema implementation were the first real deliverables and they came several days into the sprint window as a result.
+
+Closing Sprint 1 late carried over into Sprint 2. The first days of the sprint were not spent doing implementation work, but rather, hurrying up to finish what was left unfinished/undone. This slowed down the transition into coding. The Docker Compose setup and schema implementation were the first real deliverables and they came several days after the sprint had already begun. It took me a little to get really into Sprint 2, even sometime after starting it I was still wondering if there were any topics I might have missed for the first Sprint. Going on holidays for such a long time did not do me any favors.
+ 
+---
+ 
+### 🚀 What to change
+ 
+**Evaluate story feasibility properly at planning time**
+ 
+Story 2.9 (Performance Benchmarking) was dropped mid-sprint, but the real problem was that it should never have been committed in the first place without a closer look. The dataset was never meant to have a big dataset — a measurable response time difference between vector and LIKE search is pretty much impossible to tell, and the quality comparison reduces to a single observation already documented in Story 2.5, which is definitely not a benchmark. The lesson learnt is to take my time and understand what is being planned, and what needs to be implemented. If I had really understood how vector search work, I would have known that for this specific project, it was always meant to be a search that returned results even after the user made a typo.

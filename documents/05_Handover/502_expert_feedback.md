@@ -37,3 +37,6 @@ nav_order: 2
 - Sprint review sections now include story points achieved
 - Incremental testing approach to be reflected in Sprint 2 planning
 - Sprint files document all stories and tasks directly so the expert can follow without Jira access
+
+
+## Einzelbesprechung 2

@@ -36,6 +36,8 @@ Define the full project scope, design the system architecture, and produce a dat
 
 ## Story Outcomes
 
+The Dprint story outcomes are condensed in the below list, since most of the actual Sprint 1 content is within the previous 03 Project Overview section.
+
 ### 1.1 Analysis of Project Requirements & Scope
 - ✅ Functional requirements listed
 - ✅ Non-functional requirements listed
@@ -101,7 +103,7 @@ xychart-beta
     line [27, 20, 13, 7, 0]
 ```
 
-*Yellow line: actual — Orange line: ideal*
+*Purple line: actual — Grey line: ideal*
 
 ---
 
