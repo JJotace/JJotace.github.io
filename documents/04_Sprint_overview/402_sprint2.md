@@ -11,7 +11,7 @@ Burndown Chart
 
 ## Sprint Planning
 
-### Backlog for this Sprint
+### Sprint Backlog
 
 | 2.1 | Docker Compose Setup | 2 | 3 | Must |
 | 2.2 | PostgreSQL Schema Implementation | 2 | 5 | Must |
