@@ -118,8 +118,36 @@ xychart-beta
 
 ## Retrospective
 
-| What went well | What did not go well | What to change |
-|---|---|---|
-| All 27 story points completed — no scope reduction needed | Sprint closed late due to an absence that overlapped the entire sprint period | Not planning a Sprint to start on the day I leave for holidays, and ending before I am back |
-| Planning work was straightforward — architecture, schema and risk analysis required no major rework | Documentation structure was revised after expert feedback, which added unplanned work at the end of the sprint | Raise structural questions with the expert earlier into the sprint |
-| Expert confirmed delay was acceptable — project continues as planned | | |
+### 😊 What went well
+
+**All 27 story points delivered**
+
+Every story committed at the start of the sprint was completed - no scope was cut. For a first sprint that covered all architecture decisions, schema design and risk analysis from scratch, finishing everything as planned, with documentation kept up to date, was a success for me. On previous projects, my documentation has always been a bit behind my actual progress, so feeling like I'm on track for once feels rewarding. None of the deliverables required major changes after the fact either, which means the planning was solid.
+
+**Expert confirmed the project was on track**
+
+Even though the sprint closed a few days late, the expert meeting confirmed that the delay was acceptable and the project could go on as planned. Receiving feedback and knowing that the foundation of the project (schema, architecture, risk register) was in good shape going into Sprint 2 removed a lot of the uncertainty I was feeling, and helped me stay motivated, even through a shorter Sprint 2.
+
+---
+
+### 😟 What did not go well
+
+**Sprint closed late because of a holiday overlap**
+
+The first sprint spilled a bit into the second, this is because I was on my long holiday of the year, and missed most of sprint 1, so from the day I was back I had to work non-stop on finishing pretty much 80% of the stories in just a few days, which, as expected, was not enough time. Having done some work during the trip meant the delay was limited to a few days, though the risk of it carrying into Sprint 2 remained.
+
+**Documentation structure had to be revised after expert feedback**
+
+During my first two semesters, I have always followed, more or less, the same type of documentation structure. During the expert meeting, it was made clear that the structure needed change, which was a little stressful a few days before the closure of it. This was unplanned and added pressure at an already tight point. This issue could have been avoided by having an earlier meeting, but sadly my absence during my trip made this impossible too.
+
+---
+
+### 🚀 What to change
+
+**Do not plan a sprint around a holiday**
+
+The simplest fix: do not start a sprint on the day of leaving and do not schedule the end before being back. The overlap was predictable and should have been accounted for in planning.
+
+**Raise documentation structure questions with the expert early**
+
+Getting feedback on structure at the end of a sprint leaves no time to act on it without disruption. Asking those questions in the first meeting of a sprint — when there is still room to adjust — avoids the last-minute rework entirely. Maybe I could have shown an example of my past work, or asked directly what they expect of the documentation before I started working on it.
