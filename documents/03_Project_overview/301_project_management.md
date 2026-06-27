@@ -78,12 +78,12 @@ User stories are prioritised using MoSCoW (**M**ust have, **S**hould have, **C**
 
 ![MoSCoW](../../resources/images/MoSCoW.png)
 
-| Priority | Stories |
-|---|---|
-| Must have | All schema, abstraction, pgvector, documentation and review stories |
-| Should have | Views (2.7), Search Frontend (2.8), Performance Benchmarking (2.9) |
-| Could have | Redis caching, Pokémon TCG API price sync |
-| Won't have | Authentication, production deployment, multi-tenant support |
+| Priority | Stories | Reason |
+|---|---|---|
+| Must have | All schema, abstraction, pgvector, documentation and review stories | These are the core assessed deliverables. Without them the project does not meet the Merkblatt requirements — no schema means no abstractions, no abstractions means no technical implementation to assess. |
+| Should have | Views (2.7), Search Frontend (2.8), Performance Benchmarking (2.9) | These add value and demonstrate completeness but the database works without them. They were committed if time allowed and dropped if not, without affecting the core deliverable. |
+| Could have | Redis caching, Pokémon TCG API price sync | Outside the assessed scope but feasible extensions. The price sync was built as a motivational extra; Redis would require a second data store with no learning value at this scale. |
+| Won't have | Authentication, production deployment, multi-tenant support | These shift the focus away from the database entirely. A user-facing product with auth and deployment is a different project — not what is being assessed here. |
 
 ---
 
