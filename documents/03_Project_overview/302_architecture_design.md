@@ -225,18 +225,20 @@ erDiagram
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| name | VARCHAR | NOT NULL |
-| release_date | DATE | |
+| name | VARCHAR(100) | NOT NULL |
+| release_date | DATE | NOT NULL |
 
 #### cards
 
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| name | VARCHAR | NOT NULL |
-| rarity | VARCHAR | |
-| set_id | INTEGER | FOREIGN KEY → sets(id) |
-| vector | vector | pgvector embedding |
+| name | VARCHAR(100) | NOT NULL |
+| number | VARCHAR(20) | NOT NULL |
+| rarity | VARCHAR(50) | NOT NULL |
+| set_id | INTEGER | NOT NULL, FOREIGN KEY → sets(id) |
+| vector | VECTOR(384) | pgvector embedding, nullable until import runs |
+| image_url | TEXT | Nullable — populated by `sync_prices.py` (added via `08_add_image_url.sql`) |
 
 Indexes: `set_id`, `rarity`
 
@@ -245,12 +247,12 @@ Indexes: `set_id`, `rarity`
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| card_id | INTEGER | FOREIGN KEY → cards(id) |
-| condition | VARCHAR | NOT NULL |
-| quantity | INTEGER | CHECK (quantity >= 0) |
-| price | NUMERIC | CHECK (price > 0) |
-| created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
+| card_id | INTEGER | NOT NULL, FOREIGN KEY → cards(id) |
+| condition | card_condition (ENUM) | NOT NULL |
+| quantity | INTEGER | NOT NULL, DEFAULT 0, CHECK (quantity >= 0) |
+| price | NUMERIC(10,2) | NOT NULL, CHECK (price > 0) |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
+| updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
 
 Index: `card_id`
 
@@ -259,31 +261,31 @@ Index: `card_id`
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| inventory_id | INTEGER | FOREIGN KEY → inventory(id) |
-| new_price | NUMERIC | NOT NULL |
-| changed_at | TIMESTAMP | DEFAULT NOW() |
+| inventory_id | INTEGER | NOT NULL, FOREIGN KEY → inventory(id) |
+| new_price | NUMERIC(10,2) | NOT NULL |
+| changed_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
 
 #### customers
 
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| name | VARCHAR | NOT NULL |
-| email | VARCHAR | UNIQUE, NOT NULL |
-| address | TEXT | |
-| shipping_address | TEXT | |
-| created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
+| name | VARCHAR(100) | NOT NULL |
+| email | VARCHAR(150) | NOT NULL, UNIQUE |
+| address | TEXT | Nullable |
+| shipping_address | TEXT | Nullable |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
+| updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
 
 #### orders
 
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| customer_id | INTEGER | FOREIGN KEY → customers(id) |
-| status | order_status | ENUM: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED |
-| created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
+| customer_id | INTEGER | NOT NULL, FOREIGN KEY → customers(id) |
+| status | order_status (ENUM) | NOT NULL, DEFAULT 'pending' — values: pending, confirmed, shipped, delivered, cancelled |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
+| updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
 
 Index: `customer_id`
 
@@ -292,10 +294,10 @@ Index: `customer_id`
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| order_id | INTEGER | FOREIGN KEY → orders(id) |
-| card_id | INTEGER | FOREIGN KEY → cards(id) |
-| quantity | INTEGER | NOT NULL |
-| unit_price | NUMERIC | Snapshot of price at time of purchase |
+| order_id | INTEGER | NOT NULL, FOREIGN KEY → orders(id) |
+| card_id | INTEGER | NOT NULL, FOREIGN KEY → cards(id) |
+| quantity | INTEGER | NOT NULL, CHECK (quantity > 0) |
+| unit_price | NUMERIC(10,2) | NOT NULL — snapshot of price at time of purchase |
 
 Index: `order_id`
 
@@ -304,20 +306,35 @@ Index: `order_id`
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| order_id | INTEGER | FOREIGN KEY → orders(id) |
-| address | TEXT | NOT NULL |
-| status | VARCHAR | |
-| estimated_date | DATE | |
+| order_id | INTEGER | NOT NULL, FOREIGN KEY → orders(id) |
+| address | TEXT | NOT NULL — snapshot of `customers.shipping_address` at order time |
+| status | delivery_status (ENUM) | NOT NULL, DEFAULT 'pending' — values: pending, dispatched, in_transit, delivered, returned |
+| estimated_date | DATE | Nullable |
 
 #### payments
 
 | Column | Type | Constraints |
 |---|---|---|
 | id | SERIAL | PRIMARY KEY |
-| order_id | INTEGER | FOREIGN KEY → orders(id) |
-| amount | NUMERIC | NOT NULL |
-| method | VARCHAR | |
-| status | VARCHAR | |
+| order_id | INTEGER | NOT NULL, FOREIGN KEY → orders(id) |
+| amount | NUMERIC(10,2) | NOT NULL, CHECK (amount > 0) |
+| method | payment_method (ENUM) | NOT NULL — values: credit_card, debit_card, paypal, bank_transfer |
+| status | payment_status (ENUM) | NOT NULL, DEFAULT 'pending' — values: pending, completed, failed, refunded |
+
+---
+
+### Views
+
+| View | Purpose |
+|---|---|
+| `inventory_value` | Stock value per entry (quantity × price) |
+| `top_selling_cards` | Units sold and revenue ranking per card |
+| `low_stock` | Entries with quantity ≤ 2 |
+| `out_of_stock` | Entries with quantity = 0 |
+| `revenue_by_set` | Revenue grouped by set |
+| `order_summary` | Full order overview across all related tables, computes total from order_items |
+
+Full definitions and example output: [2.7 Views](../04_Sprint_overview/402_sprint2.md#27-views).
 
 ---
 

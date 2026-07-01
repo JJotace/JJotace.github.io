@@ -13,6 +13,8 @@ Burndown Chart
 
 ### Sprint Backlog
 
+| ID | Story | Sprint | Points | Priority |
+|---|---|---|---|---|
 | 2.1 | Docker Compose Setup | 2 | 3 | Must |
 | 2.2 | PostgreSQL Schema Implementation | 2 | 5 | Must |
 | 2.3 | Database Abstractions (Triggers, SPs, Functions) | 2 | 13 | Must |
@@ -829,6 +831,12 @@ This string is converted to a 384-dimension vector using the `all-MiniLM-L6-v2` 
 
 **Model choice — `all-MiniLM-L6-v2`:** Produces 384-dimension vectors, matching the `VECTOR(384)` column in the schema. Lightweight, loads in seconds, and runs fully locally inside Docker with no external API calls. A larger model like `all-mpnet-base-v2` produces 768-dimension vectors and would be more accurate, but requires a schema change, uses more memory, and is slower at query time. For 242 short card name strings the accuracy difference does not outweight the resources it requires.
 
+### Visual example
+
+When giving in the word "Toad", the database returns similar looking Pokemon.
+
+![Toad_Semantic_Search](image.png)
+
 ---
 
 ### Implementation
@@ -924,6 +932,7 @@ Vector search still surfaces all 3 Charizard X ex variants and Mega Charizard Y 
 **Conclusion:** For clean queries both approaches return the same relevant cards. The difference is typo tolerance — LIKE fails completely on `charirzard`, vector search recovers the correct cards. The trade-off is precision; vector search is configured to always returns 10 results ranked by distance, including noise, while LIKE returns only exact matches. For a card shop where users are likely mistype names, vector search provides meaningful resilience that LIKE cannot.
 
 The distances on the typo query (1.11–1.18) are higher than the clean query (0.98–1.04), showing that the model has lower confidence on the result.
+
 
 ---
 
@@ -1178,6 +1187,62 @@ SELECT * FROM order_summary;
 
 ---
 
+## 2.8 Simple Search Frontend
+
+**Points:** 3 | **Status:** Complete
+
+### Goal
+
+Provide a minimal web UI so semantic and LIKE search can be demonstrated visually during the Kolloquium, without relying on curl commands.
+
+---
+
+### Acceptance criteria
+
+| Criterion | Met |
+|---|---|
+| HTML/JS page served directly from the Python service | Yes — via `GET /` |
+| Search input sends query to the Python service | Yes |
+| Results displayed showing card name, rarity and set | Yes — also shows number, price, stock, image |
+| Toggle or tab allows switching between semantic search and LIKE search | Yes — segmented control |
+| Page works without errors on a fresh load | Yes |
+
+---
+
+### Implementation
+
+Single static file (`frontend/index.html`), no build step, no framework — served directly by the Python service's `/` route (see [2.6 Python Service](#26-python-service)). All logic is JS using `fetch()`.
+
+The mode toggle determines which endpoint is queried:
+
+```js
+const endpoint = mode === 'vector'
+  ? `/search?q=${encodeURIComponent(q)}`
+  : `/search/like?q=${encodeURIComponent(q)}`;
+const res = await fetch(endpoint);
+```
+
+Each result renders as a tile with image (if synced), name, set, number, rarity, price/stock, and — in semantic mode only — the vector distance, so the difference between the two modes is visible in the UI itself, not just in the JSON. Cards without a synced `image_url` fall back to a placeholder tile instead of a broken image.
+
+---
+
+### Screenshots
+
+#### Semantic Search
+![semantic_search.png](../../resources/images/semantic_search.png)
+
+
+#### LIKE Search
+![LIKE_search](../../resources/images/exact_search.png)
+
+---
+
+### Note
+
+The frontend is a demo aid, not a graded deliverable — per Yves Nussle's feedback in [Einzelbesprechung 3](../05_Handover/502_expert_feedback.md#einzelbesprechung-3): "the HTML frontend is not the focus, the database is the deliverable." Kept deliberately small: one file, no client-side state beyond the current result set.
+
+---
+
 ## 2.9 Performance Benchmarking (Vector vs LIKE)
  
 **Points:** 5 | **Status:** Dropped
@@ -1273,7 +1338,7 @@ One card matching issue: two cards (`Rotom ex`, `Pikachu ex`) were not found eve
 ## Sprint Review
 
 
-**Points committed:** 46 / **Points completed:** 46
+**Points committed:** 49 / **Points completed:** 47
 
 ---
 

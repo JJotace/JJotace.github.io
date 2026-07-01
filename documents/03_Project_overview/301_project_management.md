@@ -47,7 +47,7 @@ This is the product backlog as it is defined within Jira.
 | 3.4 | Presentation & Demo Preparation | 3 | 5 | Must |
 | 3.5 | Sprint 3 Review & Project Handover | 3 | 1 | Must |
 
-**Total: 99 story points**
+**Total: 104 story points**
 
 ---
 
@@ -66,7 +66,7 @@ Implement pgvector semantic search and benchmark it against traditional LIKE sea
 
 ## Story Points with Fibonacci
 
-Story points are assigned to all user stories using the Fibonacci sequence (1, 2, 3, 5, 8, 13). This estimates complexity rather than hours, making the difference in effort between tasks visible. The calibration used is approximately 2 story points per hour, giving a total budget of 99 points across all sprints, corresponding to the 50-hour workload defined in the assignment.
+Story points are assigned to all user stories using the Fibonacci sequence (1, 2, 3, 5, 8, 13). This estimates complexity rather than hours, making the difference in effort between tasks visible. The calibration used is approximately 2 story points per hour, giving a total budget of 104 points across all sprints, mostly corresponding to the 50-hour workload defined in the assignment.
 
 ![fibonacci](../../resources/images/fibonacci_story_points.png)
 

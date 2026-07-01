@@ -46,13 +46,9 @@ gantt
     3.5 Sprint 3 Review & Handover     :milestone, 2026-07-07, 0d
 ```
 
-*Actual vs planned comparison will be added here at the end of Sprint 3.*
-
----
-
 ## Story Point Estimates
 
-Story points use the Fibonacci sequence. Calibration: ~2 story points per hour, total budget 99 points ≈ 50 hours.
+Story points use the Fibonacci sequence. Calibration: ~2 story points per hour.
 
 ### Sprint 0 — Setup (6 points)
 
@@ -76,7 +72,7 @@ Story points use the Fibonacci sequence. Calibration: ~2 story points per hour, 
 | 1.7 Risk Analysis | 3 |
 | 1.8 Sprint 1 Review | 1 |
 
-### Sprint 2 — Realization (46 points)
+### Sprint 2 — Realization (49 points planned)
 
 | Story | Points |
 |---|---|
@@ -91,7 +87,25 @@ Story points use the Fibonacci sequence. Calibration: ~2 story points per hour, 
 | 2.9 Performance Benchmarking (Vector vs LIKE) | 5 |
 | 2.10 Sprint 2 Review | 1 |
 
-### Sprint 3 — Documentation (20 points)
+**Scope change during Sprint 2:** 2.9 Performance Benchmarking (5 pts, Should-have) was dropped — the vector vs. LIKE comparison is covered directly in [2.5 Semantic Search](../04_Sprint_overview/402_sprint2.md#25-semantic-search-implementation-pgvector) with real query results, so no content was lost. 2.10 TCG Price & Image Sync (3 pts, Could-have) was added mid-sprint and was not part of the original plan. Sprint Review renumbered to 2.11.
+
+#### Sprint 2 — Actual (47 points)
+
+| Story | Points | Status |
+|---|---|---|
+| 2.1 Docker Compose Setup | 3 | Complete |
+| 2.2 PostgreSQL Schema Implementation | 5 | Complete |
+| 2.3 Database Abstractions (Triggers, SPs, Functions) | 13 | Complete |
+| 2.4 3NF Schema Documentation | 3 | Complete |
+| 2.5 Semantic Search Implementation (pgvector) | 8 | Complete |
+| 2.6 Python Service | 5 | Complete |
+| 2.7 Views | 3 | Complete |
+| 2.8 Simple Search Frontend | 3 | Complete |
+| 2.9 Performance Benchmarking (Vector vs LIKE) | 0 | Dropped |
+| 2.10 TCG Price & Image Sync | 3 | Complete — added, not in original plan |
+| 2.11 Sprint 2 Review | 1 | Complete |
+
+### Sprint 3 — Documentation (22 points)
 
 | Story | Points |
 |---|---|
@@ -103,10 +117,10 @@ Story points use the Fibonacci sequence. Calibration: ~2 story points per hour, 
 
 ### Summary
 
-| Sprint | Points |
-|---|---|
-| Sprint 0 | 6 |
-| Sprint 1 | 27 |
-| Sprint 2 | 46 |
-| Sprint 3 | 20 |
-| **Total** | **99** |
+| Sprint | Planned | Actual |
+|---|---|---|
+| Sprint 0 | 6 | 6 |
+| Sprint 1 | 27 | 27 |
+| Sprint 2 | 49 | 47 |
+| Sprint 3 | 22 | 22 |
+| **Total** | **104** | **102** |

@@ -20,7 +20,7 @@ Define the full project scope, design the system architecture, and produce a dat
 
 ## Sprint Backlog
 
-| ID | Story | Sprint | SP | Priority |
+| ID | Story | Sprint | Points | Priority |
 |---|---|---|---|---|
 | 1.1 | Analysis of Project Requirements & Scope | 1 | 3 | Must |
 | 1.2 | Sprint Planning & Backlog Refinement | 1 | 2 | Must |

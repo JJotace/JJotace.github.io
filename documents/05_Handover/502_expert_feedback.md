@@ -61,8 +61,8 @@ nav_order: 2
 
 **Improvements:**
 - Replan realization sprints to follow agile incremental approach with re-planning each iteration next project
-- Split the triggers/stored procedures story into smaller, independent stories
-- Add Abgrenzung section to project management documentation
+- For future projects, split the triggers/stored procedures story into smaller, independent stories
+- Added a reason column explaining everything in and out of scope
 - Expand retrospective sections in sprint files
 - Evaluate video recording as demo format
 
