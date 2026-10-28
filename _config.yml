@@ -1,0 +1,24 @@
+title: HA PostgreSQL on Kubernetes
+description: "Semester Project 4 - CloudNativePG and automated schema migrations"
+remote_theme: just-the-docs/just-the-docs
+
+url: https://JJotace.github.io/
+
+plugins:
+  - jekyll-remote-theme
+
+aux_links:
+  GitHub Repository: https://github.com/JJotace/JJotace.github.io
+
+footer_content: "Juan Cardoso - Sem04 - Technische Berufsschule Zürich - Cloud Native Engineering - 2026/27"
+
+mermaid:
+  version: "11"
+
+# Code and pipeline files are not part of the documentation site
+exclude:
+  - k8s/
+  - db/
+  - app/
+  - scripts/
+  - README.md
