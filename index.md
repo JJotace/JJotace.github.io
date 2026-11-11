@@ -22,6 +22,8 @@ All planning, backlog, sprint progress and decisions are documented on this site
 | [4. Sprint Overview](./documents/04_Sprint_overview/) | Sprints 1–3 and closure: stories, outcomes, reviews, retrospectives; one-page summary per sprint |
 | [5. Handover](./documents/05_Handover/) | Installation, expert meetings, glossary, final reflection |
 
+Abbreviations are listed in the [Glossary](./documents/05_Handover/503_glossary.md#abbreviations).
+
 ---
 
 # Disclaimer
