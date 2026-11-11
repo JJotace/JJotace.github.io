@@ -35,7 +35,7 @@ Each component is tested in the sprint in which it is built. Test results and fi
 | 1.4 | Risk analysis | — | 1 | 3 | Must | Done |
 | 1.5 | Evaluation: Kubernetes distribution, operator, migration tool, object store | G1–G5 | 1 | 5 | Must | Done |
 | 1.6 | System design & architecture | G1–G5 | 1 | 5 | Must | Open |
-| 1.7 | kind cluster with 3 worker nodes | G1 | 1 | 3 | Must | Open |
+| 1.7 | kind cluster with 3 worker nodes | G1 | 1 | 3 | Must | Done |
 | 1.8 | CNPG operator + Cluster manifest (1 primary, 2 replicas, anti-affinity) | G1 | 1 | 5 | Must | Open |
 | 1.9 | Schema import incl. pgvector; `06_tests.sql` passes on the cluster | G1 | 1 | 5 | Must | Open |
 | 1.10 | Self-hosted GitHub Actions runner | G5 | 1 | 3 | Must | Open |
