@@ -26,7 +26,7 @@ Project planned and evaluated; the SEM03 database runs on a 3-instance CNPG clus
 | 1.2 | Requirements, scope & backlog | 3 | Must | Done |
 | 1.3 | Timeline (Gantt) | 2 | Must | Done |
 | 1.4 | Risk analysis | 3 | Must | Done |
-| 1.5 | Evaluation: Kubernetes distribution, operator, migration tool, object store | 5 | Must | Open |
+| 1.5 | Evaluation: Kubernetes distribution, operator, migration tool, object store | 5 | Must | Done |
 | 1.6 | System design & architecture | 5 | Must | Open |
 | 1.7 | kind cluster with 3 worker nodes | 3 | Must | Open |
 | 1.8 | CNPG operator + Cluster manifest (1 primary, 2 replicas, anti-affinity) | 5 | Must | Open |

@@ -20,7 +20,7 @@ gantt
     1.2 Requirements & backlog         :done, a2, 2026-11-11, 1d
     1.3 Timeline                       :done, a3, 2026-11-11, 1d
     1.4 Risk analysis                  :done, a4, 2026-11-11, 1d
-    1.5 Evaluation                     :active, a5, 2026-11-11, 2d
+    1.5 Evaluation                     :done, a5, 2026-11-11, 2d
     1.7 kind cluster                   :a7, 2026-11-11, 2d
     1.8 CNPG cluster                   :a8, after a7, 2d
     1.9 Schema import & tests          :a9, after a8, 2d

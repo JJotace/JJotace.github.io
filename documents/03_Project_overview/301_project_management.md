@@ -33,7 +33,7 @@ Each component is tested in the sprint in which it is built. Test results and fi
 | 1.2 | Requirements, scope & backlog | — | 1 | 3 | Must | Done |
 | 1.3 | Timeline (Gantt) | — | 1 | 2 | Must | Done |
 | 1.4 | Risk analysis | — | 1 | 3 | Must | Done |
-| 1.5 | Evaluation: Kubernetes distribution, operator, migration tool, object store | G1–G5 | 1 | 5 | Must | Open |
+| 1.5 | Evaluation: Kubernetes distribution, operator, migration tool, object store | G1–G5 | 1 | 5 | Must | Done |
 | 1.6 | System design & architecture | G1–G5 | 1 | 5 | Must | Open |
 | 1.7 | kind cluster with 3 worker nodes | G1 | 1 | 3 | Must | Open |
 | 1.8 | CNPG operator + Cluster manifest (1 primary, 2 replicas, anti-affinity) | G1 | 1 | 5 | Must | Open |
@@ -143,16 +143,17 @@ Probability and impact on a scale of 1 (low) to 5 (high).
 
 | ID | Risk | P | I | Mitigation |
 |---|---|---|---|---|
-| R1 | The CNPG app user is not a superuser, so `CREATE EXTENSION vector` inside a Flyway migration fails | 4 | 3 | Create the extension declaratively through CNPG instead of in a migration; check in the evaluation (1.5), verify in Story 1.9. |
+| R1 | The CNPG app user is not a superuser, so `CREATE EXTENSION vector` inside a Flyway migration fails | 4 | 3 | Confirmed in the evaluation: pgvector needs superuser rights. CNPG creates the extension instead of a migration; verify in Story 1.9. |
 | R2 | GitHub-hosted runners cannot reach the local kind cluster | 5 | 4 | Self-hosted runner on the laptop (1.10). Fallback: run the migration Job manually; PR checks stay automated. |
 | R3 | Laptop resources are not enough for 4 PostgreSQL instances plus object store | 2 | 4 | 64 GB RAM available; measure actual usage in Sprint 1. Fallback: cloud VM. |
-| R4 | No mature S3-compatible object store: MinIO's free edition is no longer maintained; the alternatives (RustFS, Garage, SeaweedFS) are younger or not documented for the Barman Cloud Plugin | 3 | 3 | Compare alternatives in the evaluation (1.5); test a backup early in Sprint 3 so a switch is still possible. |
+| R4 | No mature S3-compatible object store: MinIO's free edition is no longer maintained; the alternatives (RustFS, Garage, SeaweedFS) are younger or not documented for the Barman Cloud Plugin | 2 | 3 | Evaluated in Story 1.5: RustFS chosen, Garage as fallback. Test a backup early in Sprint 3 so a switch is still possible. |
 | R5 | Synchronous replication blocks writes when no replica can confirm | 3 | 4 | Test this case explicitly in the failover tests and document the trade-off. |
 | R6 | Failover downtime exceeds the 60 s target | 2 | 2 | According to the CNPG defaults, a controlled failover (pod deletion, node drain) hands over within seconds; a sudden node loss takes 55–70 s and is outside G2. Open question: whether open client connections delay the shutdown of the old primary. Measure in the failover tests (2.3). |
 | R7 | Total effort exceeds the 50-hour budget | 4 | 4 | G3 and G4 are Should-haves and are reduced first. |
 | R8 | Christmas holidays reduce available time in Sprint 3 | 4 | 3 | Pull Sprint 3 work forward where possible; lesson from the SEM03 Sprint 1 holiday overlap. |
 | R9 | With local storage, a lost node loses its replica's data | 5 | 2 | Expected behaviour: CNPG rebuilds the replica from the primary. Test it and document it. |
 | R10 | Demo fails during the colloquium | 2 | 5 | Scripted setup from the repository; recorded demo as backup. |
+| R11 | Public repository: a pull request from someone else runs code on the self-hosted runner | 2 | 5 | Runner only used after merges to `main`; pull request checks run on GitHub-hosted runners. |
 
 ```mermaid
 quadrantChart
@@ -166,13 +167,14 @@ quadrantChart
     R1: [0.78, 0.58]
     R2: [0.95, 0.78]
     R3: [0.38, 0.82]
-    R4: [0.62, 0.62]
+    R4: [0.38, 0.62]
     R5: [0.55, 0.75]
     R6: [0.38, 0.38]
     R7: [0.82, 0.85]
     R8: [0.85, 0.55]
     R9: [0.92, 0.38]
     R10: [0.38, 0.95]
+    R11: [0.32, 0.88]
 ```
 
 Sources for R4 and R6: [MinIO alternatives](https://vegardit.com/en/blog/minio-alternatives/), [CNPG failover](https://github.com/cloudnative-pg/cloudnative-pg/blob/main/docs/src/failover.md), [CNPG instance manager](https://github.com/cloudnative-pg/cloudnative-pg/blob/main/docs/src/instance_manager.md).

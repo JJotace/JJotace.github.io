@@ -29,7 +29,7 @@ Technical terms used in this project. Terms are added when they are first used i
 | P / I | Probability / impact in the risk register (1–5) |
 | PITR | Point-in-time recovery |
 | PR | Pull request |
-| R1–R10 | Risks 1–10 |
+| R1–R11 | Risks 1–11 |
 | `-rw` / `-ro` | CNPG services for read-write (primary) and read-only (replicas) access |
 | S3 | Amazon Simple Storage Service; "S3-compatible" stores use the same interface |
 | SEM03 | Semester 3 project |
