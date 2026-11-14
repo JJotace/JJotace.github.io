@@ -22,9 +22,9 @@ gantt
     1.4 Risk analysis                  :done, a4, 2026-11-11, 1d
     1.5 Evaluation                     :done, a5, 2026-11-11, 2d
     1.7 kind cluster                   :done, a7, 2026-11-11, 2d
-    1.8 CNPG cluster                   :a8, after a7, 2d
-    1.9 Schema import & tests          :a9, after a8, 2d
-    1.6 System design                  :a6, 2026-11-14, 2d
+    1.8 CNPG cluster                   :done, a8, 2026-11-14, 1d
+    1.9 Schema import & tests          :a9, 2026-11-15, 2d
+    1.6 System design                  :a6, 2026-11-15, 2d
     Feedback session 1                 :milestone, 2026-11-16, 0d
     1.10 Self-hosted runner            :a10, 2026-11-17, 4d
     1.11 Sprint 1 review               :milestone, 2026-11-22, 0d

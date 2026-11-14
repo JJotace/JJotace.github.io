@@ -1,0 +1,33 @@
+# CNPG cluster for G1: 1 primary + 2 streaming replicas, one per worker node.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg-shop
+spec:
+  instances: 3
+
+  # Standard image includes pgvector; same major version as SEM03.
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.16-standard-trixie
+
+  # Same database and owner as SEM03 (smart_db / smart_user).
+  # CNPG generates the password into the secret pg-shop-app.
+  bootstrap:
+    initdb:
+      database: smart_db
+      owner: smart_user
+
+  # Never schedule two instances on the same node.
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: required
+
+  storage:
+    size: 1Gi
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
